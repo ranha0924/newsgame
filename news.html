@@ -46,6 +46,123 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #475569;
     }
+
+    /* AI 해설 */
+    .ai-step {
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .ai-step.show {
+      opacity: 1;
+      transform: none;
+    }
+    .ai-heading {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #7dd3fc;
+      margin-bottom: 6px;
+    }
+    .ai-bubble {
+      background: rgba(14, 165, 233, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 0.875rem;
+      line-height: 1.65;
+      color: #e2e8f0;
+    }
+    .ai-clue-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    @media (min-width: 768px) {
+      .ai-clue-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .ai-clue, .ai-asset {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .ai-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      color: #c7d2fe;
+      background: rgba(79, 70, 229, 0.35);
+      border-radius: 6px;
+      padding: 1px 6px;
+      margin-right: 6px;
+    }
+    .ai-clue-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .ai-clue-text {
+      margin-top: 4px;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+    .ai-chain {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .ai-chip {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #e0e7ff;
+      background: #1e1b4b;
+      border: 1px solid rgba(129, 140, 248, 0.4);
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+    .ai-arrow {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+    .ai-asset-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ai-asset {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+    .ai-asset-label {
+      flex-shrink: 0;
+      min-width: 92px;
+      font-weight: 800;
+      color: #e2e8f0;
+    }
+    .ai-concept {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #fde68a;
+    }
+    .ai-dots span {
+      animation: ai-blink 1.2s infinite both;
+    }
+    .ai-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .ai-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes ai-blink {
+      0%, 80%, 100% { opacity: 0.2; }
+      40% { opacity: 1; }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-indigo-500 selection:text-white">
@@ -53,7 +170,7 @@
   <!-- TOP BAR / HEADER -->
   <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-40 px-4 py-3">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      
+
       <!-- Logo & Live Badge -->
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-lg shadow-red-900/40">
@@ -68,19 +185,19 @@
       <!-- Quick Slide Tabs -->
       <div class="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs sm:text-sm">
         <button onclick="goToSlide(0)" id="tab-btn-0" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
-          🔴 시나리오 1
+          시나리오 1
         </button>
         <button onclick="goToSlide(1)" id="tab-btn-1" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
-          🔵 시나리오 2
+          시나리오 2
         </button>
         <button onclick="goToSlide(2)" id="tab-btn-2" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
-          🟡 시나리오 3
+          시나리오 3
         </button>
         <button onclick="goToSlide(3)" id="tab-btn-3" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
-          🟣 시나리오 4
+          시나리오 4
         </button>
         <button onclick="goToSlide(4)" id="tab-btn-4" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
-          🟢 시나리오 5
+          시나리오 5
         </button>
       </div>
 
@@ -102,19 +219,19 @@
   <!-- MAIN PRESENTATION CANVAS -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
 
-    <!-- SLIDE 1: 🔴 INFLATION & RATE HIKE -->
+    <!-- SLIDE 1 -->
     <section id="slide-0" class="slide-content space-y-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
         <div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-red-400 bg-red-950/60 border border-red-800/60 px-2.5 py-1 rounded-md">
-            SCENARIO #01 • 거시경제 속보
+          <span class="text-xs font-semibold uppercase tracking-wider text-indigo-300 bg-indigo-950/60 border border-indigo-800/60 px-2.5 py-1 rounded-md">
+            SCENARIO #01 • 경제 뉴스 브리핑
           </span>
           <h2 class="text-xl md:text-2xl font-black text-slate-100 mt-1">
-            "물가 폭등과 연쇄 반응… 시중 자금의 이동"
+            202X년 4월, 이달의 주요 경제 뉴스
           </h2>
         </div>
         <p class="text-xs text-slate-400">
-          💡 뉴스 속 키워드(물가, 금리, 기업 이자, 자금 흐름)를 분석하여 자산 배분을 결정하세요.
+          💬 기사 4개를 읽고 모둠별로 토론해 보세요. 이 시기에 예금·주식·채권은 각각 어떻게 될까요?
         </p>
       </div>
 
@@ -123,35 +240,27 @@
         <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-red-400 flex items-center gap-1">
-                <i class="fa-solid fa-newspaper"></i> KBC 경제뉴스
+              <span class="font-bold text-sky-400 flex items-center gap-1">
+                <i class="fa-solid fa-tv"></i> KBC 경제뉴스
               </span>
-              <span>202X.04.12 • 사회/경제</span>
+              <span>202X.04.12 • 생활물가</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              "장바구니 물가 6.2% 폭등… 외식비·에너지 가격 14개월 만에 최고치"
+              장바구니 물가 6%대 상승… 외식비·전기요금 줄줄이 올라
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              원자재 가격 상승과 고환율 영향으로 소비자물가지수(CPI)가 급등했습니다. 생활 필수재 가격이 크게 올라 가계 소비 여력이 급속도로 위축되고 있습니다.
+              원자재 가격과 환율이 함께 오르면서 지난달 소비자물가가 1년 전보다 6.2% 올랐습니다. 식료품과 에너지 가격이 크게 뛰어 가계의 생활비 부담이 커지고 있습니다.
             </p>
           </div>
-          <!-- Chart Graphic -->
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>소비자물가지수(CPI) 상승률 추이 (%)</span>
-              <span class="text-red-400 font-bold">6.2% ▲</span>
+              <span>소비자물가 상승률 (전년 대비, %)</span>
+              <span class="text-slate-200 font-bold">6.2%</span>
             </div>
-            <svg class="w-full h-24 stroke-current" viewBox="0 0 300 100">
-              <defs>
-                <linearGradient id="grad-red" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#ef4444" stop-opacity="0.4"/>
-                  <stop offset="100%" stop-color="#ef4444" stop-opacity="0.0"/>
-                </linearGradient>
-              </defs>
+            <svg class="w-full h-24" viewBox="0 0 300 100">
               <line x1="10" y1="80" x2="290" y2="80" stroke="#334155" stroke-dasharray="3,3"/>
-              <path d="M 10 75 Q 70 70, 130 50 T 250 25 T 290 10 L 290 80 L 10 80 Z" fill="url(#grad-red)"/>
-              <path d="M 10 75 Q 70 70, 130 50 T 250 25 T 290 10" fill="none" stroke="#ef4444" stroke-width="3"/>
-              <circle cx="290" cy="10" r="4" fill="#ef4444"/>
+              <path d="M 10 75 Q 70 70, 130 50 T 250 25 T 290 10" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="10" r="4" fill="#38bdf8"/>
             </svg>
           </div>
         </article>
@@ -160,28 +269,27 @@
         <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-blue-400 flex items-center gap-1">
+              <span class="font-bold text-indigo-300 flex items-center gap-1">
                 <i class="fa-solid fa-building-columns"></i> 중앙금융일보
               </span>
-              <span>202X.04.14 • 금융정책</span>
+              <span>202X.04.14 • 통화정책</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              중앙은행 총재 "인플레이션 꺾겠다"… 빅스텝(금리 0.5%p 인상) 전격 단행
+              중앙은행, 기준금리 0.5%p 인상… 연 3.25%
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              통화당국이 치솟는 물가를 잡기 위해 기준금리를 단숨에 0.5%p 올리는 빅스텝을 단행했습니다. 추가 금리 인상 가능성도 강하게 내비쳤습니다.
+              중앙은행이 한 번에 0.5%p를 올리는 이른바 '빅스텝'을 단행했습니다. 총재는 기자회견에서 "물가가 안정될 때까지 필요한 조치를 이어가겠다"고 밝혔습니다.
             </p>
           </div>
-          <!-- Chart Graphic -->
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>기준금리 인상 단계별 추이 (%p)</span>
-              <span class="text-blue-400 font-bold">3.25% (빅스텝)</span>
+              <span>기준금리 추이 (%)</span>
+              <span class="text-slate-200 font-bold">연 3.25%</span>
             </div>
-            <svg class="w-full h-24 stroke-current" viewBox="0 0 300 100">
+            <svg class="w-full h-24" viewBox="0 0 300 100">
               <line x1="10" y1="85" x2="290" y2="85" stroke="#334155"/>
-              <path d="M 10 75 L 80 75 L 80 55 L 170 55 L 170 30 L 290 30" fill="none" stroke="#3b82f6" stroke-width="3"/>
-              <circle cx="290" cy="30" r="4" fill="#3b82f6"/>
+              <path d="M 10 75 L 80 75 L 80 55 L 170 55 L 170 30 L 290 30" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="30" r="4" fill="#38bdf8"/>
             </svg>
           </div>
         </article>
@@ -190,29 +298,32 @@
         <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-emerald-400 flex items-center gap-1">
-                <i class="fa-solid fa-piggy-bank"></i> 머니투데이
+              <span class="font-bold text-teal-300 flex items-center gap-1">
+                <i class="fa-solid fa-newspaper"></i> 데일리경제
               </span>
-              <span>202X.04.18 • 재테크</span>
+              <span>202X.04.18 • 가계금융</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              시중은행 정기예금 금리 연 5.5% 돌파… 뭉칫돈 예금으로 대이동
+              주택담보대출 금리 7% 육박… "한 달 상환액 40만 원 늘었다"
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              기준금리 인상 여파로 주요 은행들의 정기예금 이율이 5%를 넘어섰습니다. 위험 자산에서 빠져나온 시중 자금이 은행 예금 창구로 몰리고 있습니다.
+              은행 대출 금리가 빠르게 오르면서 변동금리로 돈을 빌린 가계의 이자 부담이 커지고 있습니다. 은행 창구에는 대출을 미리 갚으려는 고객들의 상담이 늘고 있습니다.
             </p>
           </div>
-          <!-- Chart Graphic -->
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>은행권 정기예금 수신 잔액 (조 원)</span>
-              <span class="text-emerald-400 font-bold">+120조 유입</span>
+              <span>주택담보대출 평균 금리 (%)</span>
+              <span class="text-slate-200 font-bold">6.9%</span>
             </div>
             <svg class="w-full h-24" viewBox="0 0 300 100">
-              <rect x="30" y="55" width="45" height="35" rx="4" fill="#1e293b"/>
-              <rect x="100" y="40" width="45" height="50" rx="4" fill="#334155"/>
-              <rect x="170" y="25" width="45" height="65" rx="4" fill="#059669"/>
-              <rect x="240" y="10" width="45" height="80" rx="4" fill="#10b981"/>
+              <rect x="30" y="60" width="45" height="30" rx="4" fill="#334155"/>
+              <rect x="100" y="45" width="45" height="45" rx="4" fill="#334155"/>
+              <rect x="170" y="28" width="45" height="62" rx="4" fill="#475569"/>
+              <rect x="240" y="18" width="45" height="72" rx="4" fill="#6366f1"/>
+              <text x="52.5" y="56" text-anchor="middle" font-size="10" fill="#94a3b8">4.1</text>
+              <text x="122.5" y="41" text-anchor="middle" font-size="10" fill="#94a3b8">5.2</text>
+              <text x="192.5" y="24" text-anchor="middle" font-size="10" fill="#94a3b8">6.3</text>
+              <text x="262.5" y="14" text-anchor="middle" font-size="10" fill="#94a3b8">6.9</text>
             </svg>
           </div>
         </article>
@@ -221,46 +332,47 @@
         <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-amber-400 flex items-center gap-1">
-                <i class="fa-solid fa-chart-line"></i> 증권타임스
+              <span class="font-bold text-amber-300 flex items-center gap-1">
+                <i class="fa-solid fa-industry"></i> 산업경제리포트
               </span>
-              <span>202X.04.20 • 증시동향</span>
+              <span>202X.04.20 • 기업</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              기업들 '이자 부담에 비상'… 코스피 2,200선 무너지며 주가 급락
+              "번 돈으로 이자 내기도 빠듯"… 기업들 공장 증설 계획 줄줄이 미뤄
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              고금리로 인한 대출 이자 부담과 소비 둔화 우려로 상장기업들의 실적 전망이 하향 조정되면서 주식 시장이 큰 폭의 하락세를 기록하고 있습니다.
+              대출 이자 부담이 커지고 소비가 줄어들 조짐을 보이자 기업들이 신규 투자와 채용 계획을 다시 검토하고 있습니다. 올해 기업 실적 전망치도 연초보다 낮아졌습니다.
             </p>
           </div>
-          <!-- Chart Graphic -->
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>주가지수(KOSPI) 추이</span>
-              <span class="text-red-400 font-bold">2,180p (-18.4%)</span>
+              <span>기업 설비투자 계획 증감률 (%)</span>
+              <span class="text-slate-200 font-bold">-12.4%</span>
             </div>
             <svg class="w-full h-24" viewBox="0 0 300 100">
-              <path d="M 10 15 L 80 25 L 140 45 L 210 60 L 290 85" fill="none" stroke="#ef4444" stroke-width="3"/>
-              <circle cx="290" cy="85" r="4" fill="#ef4444"/>
+              <line x1="10" y1="40" x2="290" y2="40" stroke="#334155" stroke-dasharray="3,3"/>
+              <text x="284" y="36" font-size="9" fill="#64748b">0</text>
+              <path d="M 10 30 L 80 34 L 150 48 L 220 62 L 290 76" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="76" r="4" fill="#38bdf8"/>
             </svg>
           </div>
         </article>
       </div>
     </section>
 
-    <!-- SLIDE 2: 🔵 RECESSION & RATE CUT -->
+    <!-- SLIDE 2 -->
     <section id="slide-1" class="slide-content space-y-4 hidden">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
         <div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 bg-blue-950/60 border border-blue-800/60 px-2.5 py-1 rounded-md">
-            SCENARIO #02 • 거시경제 속보
+          <span class="text-xs font-semibold uppercase tracking-wider text-indigo-300 bg-indigo-950/60 border border-indigo-800/60 px-2.5 py-1 rounded-md">
+            SCENARIO #02 • 경제 뉴스 브리핑
           </span>
           <h2 class="text-xl md:text-2xl font-black text-slate-100 mt-1">
-            "경기 불황의 그늘과 채권 시장의 반격"
+            202X년 8월, 이달의 주요 경제 뉴스
           </h2>
         </div>
         <p class="text-xs text-slate-400">
-          💡 뉴스 속 키워드(고용 한파, 금리 인하, 안전자산, 채권 가격)를 주의 깊게 살피세요.
+          💬 기사 4개를 읽고 모둠별로 토론해 보세요. 이 시기에 예금·주식·채권은 각각 어떻게 될까요?
         </p>
       </div>
 
@@ -269,26 +381,27 @@
         <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-blue-400 flex items-center gap-1">
+              <span class="font-bold text-teal-300 flex items-center gap-1">
                 <i class="fa-solid fa-newspaper"></i> 데일리경제
               </span>
-              <span>202X.08.05 • 산업/고용</span>
+              <span>202X.08.05 • 고용</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              소비 심리 냉각에 고용 한파… 청년 실업률 3년 만에 최고치 기록
+              청년 실업률 3년 만에 최고… 기업들 하반기 채용 '최소화'
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              경기 침체가 본격화되면서 기업들이 신규 채용을 축소하고 있습니다. 가계 소비 지출 지수도 4분기 연속 감소세를 나타냈습니다.
+              경기가 얼어붙으면서 기업들이 신규 채용을 줄이고 있습니다. 지난달 청년 실업률은 8.4%로 3년 만에 가장 높은 수준을 기록했습니다.
             </p>
           </div>
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>소비자지출지수 vs 실업률</span>
-              <span class="text-blue-400 font-bold">실업률 8.4% ▲</span>
+              <span>청년 실업률 (%)</span>
+              <span class="text-slate-200 font-bold">8.4%</span>
             </div>
             <svg class="w-full h-24" viewBox="0 0 300 100">
-              <path d="M 10 20 L 100 45 L 200 65 L 290 80" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4,4"/>
-              <path d="M 10 80 L 100 60 L 200 40 L 290 15" fill="none" stroke="#3b82f6" stroke-width="3"/>
+              <line x1="10" y1="85" x2="290" y2="85" stroke="#334155"/>
+              <path d="M 10 78 L 80 70 L 150 58 L 220 40 L 290 20" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="20" r="4" fill="#38bdf8"/>
             </svg>
           </div>
         </article>
@@ -297,25 +410,323 @@
         <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-indigo-400 flex items-center gap-1">
-                <i class="fa-solid fa-building-columns"></i> 글로벌파이낸스
+              <span class="font-bold text-sky-400 flex items-center gap-1">
+                <i class="fa-solid fa-tv"></i> KBC 경제뉴스
               </span>
-              <span>202X.08.12 • 거시경제</span>
+              <span>202X.08.09 • 소비</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              정부·중앙은행, 경기 불황 막기 위해 기준금리 0.5%p 기습 인하
+              지갑 닫은 소비자들… 소매판매 4개 분기 연속 감소
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              침체된 경기를 부양하기 위해 통화당국이 기준금리를 대폭 낮추고 시중에 유동성을 공급하는 경기 방어 정책에 착수했습니다.
+              외식, 의류, 여행 등 대부분의 분야에서 소비가 줄었습니다. 상인들은 "손님이 작년의 절반 수준"이라며 어려움을 호소하고 있습니다.
             </p>
           </div>
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>기준금리 인하 추이 (%p)</span>
-              <span class="text-blue-400 font-bold">1.50% (-0.5%p)</span>
+              <span>소매판매액 증감률 (전년 대비, %)</span>
+              <span class="text-slate-200 font-bold">-3.1%</span>
             </div>
             <svg class="w-full h-24" viewBox="0 0 300 100">
-              <path d="M 10 15 L 100 15 L 100 45 L 200 45 L 200 75 L 290 75" fill="none" stroke="#60a5fa" stroke-width="3"/>
+              <line x1="10" y1="20" x2="290" y2="20" stroke="#334155"/>
+              <rect x="30" y="20" width="45" height="12" rx="4" fill="#334155"/>
+              <rect x="100" y="20" width="45" height="24" rx="4" fill="#334155"/>
+              <rect x="170" y="20" width="45" height="40" rx="4" fill="#475569"/>
+              <rect x="240" y="20" width="45" height="52" rx="4" fill="#6366f1"/>
+              <text x="52.5" y="43" text-anchor="middle" font-size="10" fill="#94a3b8">-0.8</text>
+              <text x="122.5" y="55" text-anchor="middle" font-size="10" fill="#94a3b8">-1.5</text>
+              <text x="192.5" y="71" text-anchor="middle" font-size="10" fill="#94a3b8">-2.4</text>
+              <text x="262.5" y="83" text-anchor="middle" font-size="10" fill="#94a3b8">-3.1</text>
+            </svg>
+          </div>
+        </article>
+
+        <!-- Article 3 -->
+        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span class="font-bold text-indigo-300 flex items-center gap-1">
+                <i class="fa-solid fa-building-columns"></i> 중앙금융일보
+              </span>
+              <span>202X.08.12 • 통화정책</span>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
+              중앙은행, 기준금리 0.5%p 인하… 연 1.50%
+            </h3>
+            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
+              중앙은행이 경기를 살리기 위해 기준금리를 큰 폭으로 내렸습니다. 총재는 "경기 회복이 더디면 추가 인하도 검토하겠다"고 밝혀, 시장에서는 금리가 더 내려갈 것이라는 전망이 우세합니다.
+            </p>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
+              <span>기준금리 추이 (%)</span>
+              <span class="text-slate-200 font-bold">연 1.50%</span>
+            </div>
+            <svg class="w-full h-24" viewBox="0 0 300 100">
+              <line x1="10" y1="85" x2="290" y2="85" stroke="#334155"/>
+              <path d="M 10 20 L 100 20 L 100 45 L 200 45 L 200 75 L 290 75" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="75" r="4" fill="#38bdf8"/>
+            </svg>
+          </div>
+        </article>
+
+        <!-- Article 4 -->
+        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span class="font-bold text-amber-300 flex items-center gap-1">
+                <i class="fa-solid fa-industry"></i> 산업경제리포트
+              </span>
+              <span>202X.08.20 • 기업</span>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
+              상장사 하반기 실적 전망 줄하향… 수출 주문도 감소
+            </h3>
+            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
+              국내외 수요가 줄면서 주요 기업들의 하반기 영업이익 전망치가 잇따라 낮아지고 있습니다. 일부 기업은 비용을 아끼기 위해 공장 가동을 줄이기로 했습니다.
+            </p>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
+              <span>주요 상장사 영업이익 전망치 (조 원)</span>
+              <span class="text-slate-200 font-bold">36조 원</span>
+            </div>
+            <svg class="w-full h-24" viewBox="0 0 300 100">
+              <rect x="30" y="18" width="45" height="72" rx="4" fill="#334155"/>
+              <rect x="100" y="28" width="45" height="62" rx="4" fill="#334155"/>
+              <rect x="170" y="38" width="45" height="52" rx="4" fill="#475569"/>
+              <rect x="240" y="46" width="45" height="44" rx="4" fill="#6366f1"/>
+              <text x="52.5" y="14" text-anchor="middle" font-size="10" fill="#94a3b8">52</text>
+              <text x="122.5" y="24" text-anchor="middle" font-size="10" fill="#94a3b8">47</text>
+              <text x="192.5" y="34" text-anchor="middle" font-size="10" fill="#94a3b8">41</text>
+              <text x="262.5" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">36</text>
+            </svg>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- SLIDE 3 -->
+    <section id="slide-2" class="slide-content space-y-4 hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-indigo-300 bg-indigo-950/60 border border-indigo-800/60 px-2.5 py-1 rounded-md">
+            SCENARIO #03 • 경제 뉴스 브리핑
+          </span>
+          <h2 class="text-xl md:text-2xl font-black text-slate-100 mt-1">
+            202X년 11월, 이달의 주요 경제 뉴스
+          </h2>
+        </div>
+        <p class="text-xs text-slate-400">
+          💬 기사 4개를 읽고 모둠별로 토론해 보세요. 이 시기에 예금·주식·채권은 각각 어떻게 될까요?
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Article 1 -->
+        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span class="font-bold text-rose-300 flex items-center gap-1">
+                <i class="fa-solid fa-microchip"></i> 테크타임스
+              </span>
+              <span>202X.11.02 • 기술/산업</span>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
+              차세대 AI 반도체 양산 성공… 해외 주문 몰려
+            </h3>
+            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
+              국내 기업이 개발한 초거대 AI용 반도체가 본격 양산에 들어갔습니다. 글로벌 빅테크 기업들의 주문이 몰리면서 반도체 수출액이 역대 최고치를 기록했습니다.
+            </p>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
+              <span>분기별 반도체 수출액 (억 달러)</span>
+              <span class="text-slate-200 font-bold">156억 달러</span>
+            </div>
+            <svg class="w-full h-24" viewBox="0 0 300 100">
+              <rect x="30" y="54" width="45" height="36" rx="4" fill="#334155"/>
+              <rect x="100" y="44" width="45" height="46" rx="4" fill="#334155"/>
+              <rect x="170" y="32" width="45" height="58" rx="4" fill="#475569"/>
+              <rect x="240" y="16" width="45" height="74" rx="4" fill="#6366f1"/>
+              <text x="52.5" y="50" text-anchor="middle" font-size="10" fill="#94a3b8">98</text>
+              <text x="122.5" y="40" text-anchor="middle" font-size="10" fill="#94a3b8">112</text>
+              <text x="192.5" y="28" text-anchor="middle" font-size="10" fill="#94a3b8">131</text>
+              <text x="262.5" y="12" text-anchor="middle" font-size="10" fill="#94a3b8">156</text>
+            </svg>
+          </div>
+        </article>
+
+        <!-- Article 2 -->
+        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span class="font-bold text-sky-400 flex items-center gap-1">
+                <i class="fa-solid fa-tv"></i> KBC 경제뉴스
+              </span>
+              <span>202X.11.10 • 기업실적</span>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
+              IT 기업 3분기 영업이익 2.5배로… "AI 서비스 이용자 폭발적 증가"
+            </h3>
+            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
+              AI 서비스와 반도체 수요가 함께 늘면서 주요 IT 기업들의 영업이익이 1년 전보다 150% 넘게 늘었습니다. 증권가는 내년 실적 전망치도 일제히 올려 잡았습니다.
+            </p>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
+              <span>주요 IT 기업 분기 영업이익 (전년 대비)</span>
+              <span class="text-slate-200 font-bold">+152%</span>
+            </div>
+            <svg class="w-full h-24" viewBox="0 0 300 100">
+              <line x1="10" y1="85" x2="290" y2="85" stroke="#334155"/>
+              <path d="M 10 80 Q 80 75, 140 50 T 290 12" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="12" r="4" fill="#38bdf8"/>
+            </svg>
+          </div>
+        </article>
+
+        <!-- Article 3 -->
+        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span class="font-bold text-teal-300 flex items-center gap-1">
+                <i class="fa-solid fa-newspaper"></i> 데일리경제
+              </span>
+              <span>202X.11.18 • 고용</span>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
+              AI 개발자 모시기 경쟁… 채용 공고 역대 최다, 초봉도 껑충
+            </h3>
+            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
+              신기술 분야 기업들이 인재 확보 경쟁을 벌이면서 관련 채용 공고가 1년 새 두 배로 늘었습니다. 신입 개발자 연봉도 평균 20% 이상 올랐습니다.
+            </p>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
+              <span>신기술 분야 채용 공고 수 (만 건)</span>
+              <span class="text-slate-200 font-bold">6.3만 건</span>
+            </div>
+            <svg class="w-full h-24" viewBox="0 0 300 100">
+              <rect x="30" y="60" width="45" height="30" rx="4" fill="#334155"/>
+              <rect x="100" y="52" width="45" height="38" rx="4" fill="#334155"/>
+              <rect x="170" y="38" width="45" height="52" rx="4" fill="#475569"/>
+              <rect x="240" y="22" width="45" height="68" rx="4" fill="#6366f1"/>
+              <text x="52.5" y="56" text-anchor="middle" font-size="10" fill="#94a3b8">3.1</text>
+              <text x="122.5" y="48" text-anchor="middle" font-size="10" fill="#94a3b8">3.8</text>
+              <text x="192.5" y="34" text-anchor="middle" font-size="10" fill="#94a3b8">4.9</text>
+              <text x="262.5" y="18" text-anchor="middle" font-size="10" fill="#94a3b8">6.3</text>
+            </svg>
+          </div>
+        </article>
+
+        <!-- Article 4 -->
+        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span class="font-bold text-amber-300 flex items-center gap-1">
+                <i class="fa-solid fa-industry"></i> 산업경제리포트
+              </span>
+              <span>202X.11.25 • 거시경제</span>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
+              데이터센터·공장 투자 28% 늘어… 내년 성장률 전망 상향
+            </h3>
+            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
+              신기술이 산업 전반의 생산성을 끌어올리며 기업 투자가 크게 늘고 있습니다. 일부 전문가들은 "경기가 빠르게 달아오르면 시장 금리가 오를 수 있다"고 내다봤습니다.
+            </p>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
+              <span>신산업 설비투자 증가율 (%)</span>
+              <span class="text-slate-200 font-bold">+28.5%</span>
+            </div>
+            <svg class="w-full h-24" viewBox="0 0 300 100">
+              <line x1="10" y1="85" x2="290" y2="85" stroke="#334155"/>
+              <path d="M 10 70 L 100 62 L 180 38 L 290 16" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="16" r="4" fill="#38bdf8"/>
+            </svg>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- SLIDE 4 -->
+    <section id="slide-3" class="slide-content space-y-4 hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-indigo-300 bg-indigo-950/60 border border-indigo-800/60 px-2.5 py-1 rounded-md">
+            SCENARIO #04 • 경제 뉴스 브리핑
+          </span>
+          <h2 class="text-xl md:text-2xl font-black text-slate-100 mt-1">
+            202X년 3월, 이달의 주요 경제 뉴스
+          </h2>
+        </div>
+        <p class="text-xs text-slate-400">
+          💬 기사 4개를 읽고 모둠별로 토론해 보세요. 이 시기에 예금·주식·채권은 각각 어떻게 될까요?
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Article 1 -->
+        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span class="font-bold text-cyan-300 flex items-center gap-1">
+                <i class="fa-solid fa-globe"></i> 세계금융일보
+              </span>
+              <span>202X.03.03 • 국제금융</span>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
+              글로벌 대형 투자은행, 파생상품 손실로 파산 위기설
+            </h3>
+            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
+              세계 5위권 투자은행이 대규모 파생상품 손실을 감당하지 못하고 있다는 소식이 전해졌습니다. 이 은행과 거래한 다른 금융회사들도 연쇄적으로 손실을 볼 수 있다는 우려가 커지고 있습니다.
+            </p>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
+              <span>금융회사 신용위험 지표 (CDS 프리미엄)</span>
+              <span class="text-slate-200 font-bold">3주 새 4배</span>
+            </div>
+            <svg class="w-full h-24" viewBox="0 0 300 100">
+              <line x1="10" y1="85" x2="290" y2="85" stroke="#334155"/>
+              <path d="M 10 80 L 90 78 L 150 72 L 190 30 L 240 18 L 290 12" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="12" r="4" fill="#38bdf8"/>
+            </svg>
+          </div>
+        </article>
+
+        <!-- Article 2 -->
+        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span class="font-bold text-indigo-300 flex items-center gap-1">
+                <i class="fa-solid fa-building-columns"></i> 중앙금융일보
+              </span>
+              <span>202X.03.06 • 금융시장</span>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
+              "서로 못 믿겠다"… 금융회사 간 돈 거래 끊기고 회사채 발행도 멈춰
+            </h3>
+            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
+              금융회사들이 거래 상대의 부실을 의심하면서 서로 돈을 빌려주지 않고 있습니다. 회사채 발행도 사실상 멈춰 기업들이 운영 자금을 구하지 못하고 있습니다.
+            </p>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
+              <span>주간 회사채 발행액 (조 원)</span>
+              <span class="text-slate-200 font-bold">2.4조 원</span>
+            </div>
+            <svg class="w-full h-24" viewBox="0 0 300 100">
+              <rect x="30" y="20" width="45" height="70" rx="4" fill="#334155"/>
+              <rect x="100" y="24" width="45" height="66" rx="4" fill="#334155"/>
+              <rect x="170" y="60" width="45" height="30" rx="4" fill="#475569"/>
+              <rect x="240" y="76" width="45" height="14" rx="4" fill="#6366f1"/>
+              <text x="52.5" y="16" text-anchor="middle" font-size="10" fill="#94a3b8">12.4</text>
+              <text x="122.5" y="20" text-anchor="middle" font-size="10" fill="#94a3b8">11.8</text>
+              <text x="192.5" y="56" text-anchor="middle" font-size="10" fill="#94a3b8">5.1</text>
+              <text x="262.5" y="72" text-anchor="middle" font-size="10" fill="#94a3b8">2.4</text>
             </svg>
           </div>
         </article>
@@ -325,27 +736,26 @@
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
               <span class="font-bold text-sky-400 flex items-center gap-1">
-                <i class="fa-solid fa-piggy-bank"></i> 금융저널
+                <i class="fa-solid fa-tv"></i> KBC 경제뉴스
               </span>
-              <span>202X.08.15 • 수신동향</span>
+              <span>202X.03.10 • 산업</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              예금 금리 1%대로 뚝… "돈 맡길 곳 없다" 예금자 울상
+              해외 주문 취소 잇따라… 수출 기업들 "올해 계획 원점 재검토"
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              기준금리 인하 여파로 은행권 정기예금 금리가 연 1%대로 추락했습니다. 이자 수입에 의존하던 은퇴자와 자산가들의 고민이 커지고 있습니다.
+              세계 경기가 급격히 얼어붙을 수 있다는 걱정에 해외 거래처들이 주문을 미루거나 취소하고 있습니다. 일부 기업은 구조조정과 인원 감축을 검토하고 있습니다.
             </p>
           </div>
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>정기예금 평균 금리 (%)</span>
-              <span class="text-slate-400 font-bold">1.25% ▼</span>
+              <span>수출 기업 신규 주문 지수</span>
+              <span class="text-slate-200 font-bold">62.3</span>
             </div>
             <svg class="w-full h-24" viewBox="0 0 300 100">
-              <rect x="30" y="15" width="45" height="75" rx="4" fill="#3b82f6"/>
-              <rect x="100" y="35" width="45" height="55" rx="4" fill="#334155"/>
-              <rect x="170" y="60" width="45" height="30" rx="4" fill="#1e293b"/>
-              <rect x="240" y="72" width="45" height="18" rx="4" fill="#0f172a"/>
+              <line x1="10" y1="85" x2="290" y2="85" stroke="#334155"/>
+              <path d="M 10 25 L 120 30 L 170 70 L 290 80" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="80" r="4" fill="#38bdf8"/>
             </svg>
           </div>
         </article>
@@ -354,311 +764,46 @@
         <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-cyan-400 flex items-center gap-1">
-                <i class="fa-solid fa-file-contract"></i> 채권인사이트
+              <span class="font-bold text-teal-300 flex items-center gap-1">
+                <i class="fa-solid fa-newspaper"></i> 데일리경제
               </span>
-              <span>202X.08.20 • 채권시장</span>
+              <span>202X.03.15 • 정책</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              안전자산 쏠림 현상… 국채 가격 급등하며 채권 시장 대호황
+              주요국 중앙은행 긴급 금리 인하… 정부 "은행 예금은 법으로 보호"
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              금리가 추가 하락할 것이라는 전망 속에 채권 금리가 급락(채권 가격은 급등)하면서 국채 투자자들이 높은 자본 유동성 평가이익을 거두고 있습니다.
+              각국 중앙은행이 정례 회의를 기다리지 않고 금리를 내리며 시장에 돈을 풀었습니다. 정부는 "은행 예금은 예금자보호제도로 보호된다"며 차분하게 대응해 달라고 당부했습니다.
             </p>
           </div>
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>국채 10년물 가격 지수</span>
-              <span class="text-cyan-400 font-bold">+15.2% ▲</span>
+              <span>기준금리 추이 (%)</span>
+              <span class="text-slate-200 font-bold">긴급 인하</span>
             </div>
             <svg class="w-full h-24" viewBox="0 0 300 100">
-              <path d="M 10 80 L 90 60 L 170 30 L 290 10" fill="none" stroke="#22d3ee" stroke-width="3"/>
-              <circle cx="290" cy="10" r="4" fill="#22d3ee"/>
+              <line x1="10" y1="85" x2="290" y2="85" stroke="#334155"/>
+              <path d="M 10 25 L 200 25 L 200 70 L 290 70" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="70" r="4" fill="#38bdf8"/>
             </svg>
           </div>
         </article>
       </div>
     </section>
 
-    <!-- SLIDE 3: 🟡 TECH BOOM & BULL MARKET -->
-    <section id="slide-2" class="slide-content space-y-4 hidden">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-        <div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-amber-400 bg-amber-950/60 border border-amber-800/60 px-2.5 py-1 rounded-md">
-            SCENARIO #03 • 거시경제 속보
-          </span>
-          <h2 class="text-xl md:text-2xl font-black text-slate-100 mt-1">
-            "기술 혁신 열풍과 위험 자산으로의 자금 대이동"
-          </h2>
-        </div>
-        <p class="text-xs text-slate-400">
-          💡 뉴스 속 키워드(AI 혁신, IT 실적 폭등, 주식시장 불장, 자금 대이동)를 분석하세요.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Article 1 -->
-        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-amber-400 flex items-center gap-1">
-                <i class="fa-solid fa-microchip"></i> 테크타임스
-              </span>
-              <span>202X.11.02 • 기술/산업</span>
-            </div>
-            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              초거대 AI 및 차세대 반도체 상용화… IT 대장주 역대 최대 실적
-            </h3>
-            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              혁신 기술의 실생활 보급이 가속화되면서 글로벌 반도체 및 빅테크 기업들의 영업이익이 전년 대비 150% 이상 폭증했습니다.
-            </p>
-          </div>
-          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>주요 테크 기업 분기 영업이익 (억 달러)</span>
-              <span class="text-amber-400 font-bold">+152% ▲</span>
-            </div>
-            <svg class="w-full h-24" viewBox="0 0 300 100">
-              <rect x="30" y="65" width="45" height="25" rx="4" fill="#334155"/>
-              <rect x="100" y="50" width="45" height="40" rx="4" fill="#d97706"/>
-              <rect x="170" y="25" width="45" height="65" rx="4" fill="#f59e0b"/>
-              <rect x="240" y="8" width="45" height="82" rx="4" fill="#fbbf24"/>
-            </svg>
-          </div>
-        </article>
-
-        <!-- Article 2 -->
-        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-yellow-400 flex items-center gap-1">
-                <i class="fa-solid fa-chart-line"></i> 증시뉴스24
-              </span>
-              <span>202X.11.10 • 글로벌증시</span>
-            </div>
-            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              코스피·나스닥 사상 최고치 경신… 글로벌 증시 '역대급 불장'
-            </h3>
-            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              기술주 중심의 강한 상승세가 증시 전체로 확산되면서 연일 신고가를 고쳐 쓰고 있습니다. 주식 시장으로의 개인 투자자 유입이 급증했습니다.
-            </p>
-          </div>
-          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>나스닥 / 코스피 지수 급등 모멘텀</span>
-              <span class="text-amber-400 font-bold">+40% 돌파</span>
-            </div>
-            <svg class="w-full h-24" viewBox="0 0 300 100">
-              <path d="M 10 80 Q 80 75, 140 40 T 290 10" fill="none" stroke="#fbbf24" stroke-width="3"/>
-              <circle cx="290" cy="10" r="4" fill="#fbbf24"/>
-            </svg>
-          </div>
-        </article>
-
-        <!-- Article 3 -->
-        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-orange-400 flex items-center gap-1">
-                <i class="fa-solid fa-arrows-split-up-and-left"></i> 자산관리일보
-              </span>
-              <span>202X.11.18 • 자금흐름</span>
-            </div>
-            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              주식 열풍에 자금 대이동… 예금·채권 자금 주식 시장으로 대거 흡수
-            </h3>
-            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              안전 자산인 예금과 채권에 묶여있던 자금들이 해지되어 수익률이 높은 주식 시장으로 이동하는 '머니무브' 현상이 가속화되고 있습니다.
-            </p>
-          </div>
-          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>자산군별 자금 이동 비중</span>
-              <span class="text-amber-400 font-bold">주식 유입량 최고</span>
-            </div>
-            <svg class="w-full h-24" viewBox="0 0 300 100">
-              <!-- Stock Bar -->
-              <rect x="40" y="15" width="120" height="20" rx="3" fill="#f59e0b"/>
-              <!-- Deposit Bar -->
-              <rect x="40" y="45" width="60" height="20" rx="3" fill="#475569"/>
-              <!-- Bond Bar -->
-              <rect x="40" y="75" width="45" height="20" rx="3" fill="#334155"/>
-            </svg>
-          </div>
-        </article>
-
-        <!-- Article 4 -->
-        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-lime-400 flex items-center gap-1">
-                <i class="fa-solid fa-industry"></i> 산업경제리포트
-              </span>
-              <span>202X.11.25 • 거시성장</span>
-            </div>
-            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              글로벌 테크 기업 투자의 날개… 신산업 중심 경제 호황 진입
-            </h3>
-            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              신기술 혁신이 제조업 및 서비스 전반의 생산성을 대폭 끌어올리며, 경제 전반이 기술 주도형 신성장 국면에 진입했습니다.
-            </p>
-          </div>
-          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>신산업 설비투자(CAPEX) 성장률</span>
-              <span class="text-lime-400 font-bold">+28.5% ▲</span>
-            </div>
-            <svg class="w-full h-24" viewBox="0 0 300 100">
-              <path d="M 10 70 L 100 65 L 180 35 L 290 15" fill="none" stroke="#84cc16" stroke-width="3"/>
-            </svg>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- SLIDE 4: 🟣 FINANCIAL CRISIS / BLACK SWAN -->
-    <section id="slide-3" class="slide-content space-y-4 hidden">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-        <div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 bg-purple-950/60 border border-purple-800/60 px-2.5 py-1 rounded-md">
-            SCENARIO #04 • 거시경제 속보
-          </span>
-          <h2 class="text-xl md:text-2xl font-black text-slate-100 mt-1">
-            "예상치 못한 충격과 시장 패닉"
-          </h2>
-        </div>
-        <p class="text-xs text-slate-400">
-          💡 뉴스 속 키워드(도산 위기, 서킷브레이커, 위험자산 매도, 현금·예금 피신)를 파악하세요.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Article 1 -->
-        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-purple-400 flex items-center gap-1">
-                <i class="fa-solid fa-globe"></i> 세계금융일보
-              </span>
-              <span>202X.03.03 • 글로벌위기</span>
-            </div>
-            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              글로벌 톱5 초대형 투자은행 도산 위기… 글로벌 금융시장 '패닉'
-            </h3>
-            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              파생상품 부실화로 글로벌 대형 금융기관의 파산 위험이 연쇄적으로 고조되면서 세계 금융 시스템이 순식간에 마비 상태에 빠졌습니다.
-            </p>
-          </div>
-          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>금융위기 위험지수 (CDS 스프레드)</span>
-              <span class="text-purple-400 font-bold">위험 수치 급등</span>
-            </div>
-            <svg class="w-full h-24" viewBox="0 0 300 100">
-              <path d="M 10 80 L 120 75 L 160 20 L 290 10" fill="none" stroke="#a855f7" stroke-width="3"/>
-            </svg>
-          </div>
-        </article>
-
-        <!-- Article 2 -->
-        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-pink-400 flex items-center gap-1">
-                <i class="fa-solid fa-triangle-exclamation"></i> 글로벌증시포커스
-              </span>
-              <span>202X.03.05 • 증시폭락</span>
-            </div>
-            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              세계 증시 일제히 폭락, 서킷브레이커 발동… "2008년 재현되나"
-            </h3>
-            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              주요국 증시가 하루 만에 8~10% 이상 폭락하며 매매가 일시 정지되는 서킷브레이커가 발동되었습니다. 투자 심리가 극도로 악화되었습니다.
-            </p>
-          </div>
-          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>주요 증시 일간 변동률</span>
-              <span class="text-red-500 font-bold">-40% 수직 낙하</span>
-            </div>
-            <svg class="w-full h-24" viewBox="0 0 300 100">
-              <path d="M 10 15 L 100 20 L 110 85 L 290 90" fill="none" stroke="#ec4899" stroke-width="3"/>
-            </svg>
-          </div>
-        </article>
-
-        <!-- Article 3 -->
-        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-fuchsia-400 flex items-center gap-1">
-                <i class="fa-solid fa-shield-halved"></i> 자산방어저널
-              </span>
-              <span>202X.03.10 • 안전자산</span>
-            </div>
-            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              투자자들 "일단 현금·예금으로 피신"… 위험자산 무차별 매도세
-            </h3>
-            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              시장 불확실성이 극에 달하자 투자자들이 주식 등 모든 위험자산을 현금화하고 원금이 100% 보장되는 은행 정기예금으로 무차별 이동하고 있습니다.
-            </p>
-          </div>
-          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>안전자산(현금/예금) 선호 지수</span>
-              <span class="text-fuchsia-400 font-bold">최고치 달성</span>
-            </div>
-            <svg class="w-full h-24" viewBox="0 0 300 100">
-              <rect x="30" y="60" width="45" height="30" rx="4" fill="#334155"/>
-              <rect x="100" y="45" width="45" height="45" rx="4" fill="#475569"/>
-              <rect x="170" y="20" width="45" height="70" rx="4" fill="#c084fc"/>
-              <rect x="240" y="8" width="45" height="82" rx="4" fill="#e879f9"/>
-            </svg>
-          </div>
-        </article>
-
-        <!-- Article 4 -->
-        <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-violet-400 flex items-center gap-1">
-                <i class="fa-solid fa-building-circle-xmark"></i> 신용평가투데이
-              </span>
-              <span>202X.03.15 • 기업신용</span>
-            </div>
-            <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              신용 경색 가속화… 기업 자금줄 막히며 단기 채권 시장 얼어붙어
-            </h3>
-            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              금융 시장 부실로 기업들의 회사채 발행이 전면 중단되었습니다. 신용 위험이 가중되며 기업 채권 시장도 극심한 거래 가뭄을 겪고 있습니다.
-            </p>
-          </div>
-          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>회사채 발행량 거래실적</span>
-              <span class="text-red-400 font-bold">-80% 급감</span>
-            </div>
-            <svg class="w-full h-24" viewBox="0 0 300 100">
-              <path d="M 10 20 L 100 30 L 180 80 L 290 85" fill="none" stroke="#8b5cf6" stroke-width="3"/>
-            </svg>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- SLIDE 5: 🟢 GOLDILOCKS (STABLE GROWTH) -->
+    <!-- SLIDE 5 -->
     <section id="slide-4" class="slide-content space-y-4 hidden">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
         <div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-1 rounded-md">
-            SCENARIO #05 • 거시경제 속보
+          <span class="text-xs font-semibold uppercase tracking-wider text-indigo-300 bg-indigo-950/60 border border-indigo-800/60 px-2.5 py-1 rounded-md">
+            SCENARIO #05 • 경제 뉴스 브리핑
           </span>
           <h2 class="text-xl md:text-2xl font-black text-slate-100 mt-1">
-            "물가 안정과 적정한 성장… 이상적인 동반 상승"
+            202X년 6월, 이달의 주요 경제 뉴스
           </h2>
         </div>
         <p class="text-xs text-slate-400">
-          💡 뉴스 속 키워드(물가 2%대 안착, 연착륙 성공, 금리 동결, 자산시장 안정)를 살펴보고 판단하세요.
+          💬 기사 4개를 읽고 모둠별로 토론해 보세요. 이 시기에 예금·주식·채권은 각각 어떻게 될까요?
         </p>
       </div>
 
@@ -667,26 +812,28 @@
         <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-emerald-400 flex items-center gap-1">
-                <i class="fa-solid fa-chart-pie"></i> 거시경제월간지
+              <span class="font-bold text-sky-400 flex items-center gap-1">
+                <i class="fa-solid fa-tv"></i> KBC 경제뉴스
               </span>
-              <span>202X.06.01 • 물가동향</span>
+              <span>202X.06.01 • 생활물가</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              소비자물가 2.1%대 안착… 인플레이션 우려 완벽히 해소
+              소비자물가 2.1% 상승… 1년째 2% 안팎 유지
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              물가상승률이 목표치인 2% 수준에서 오랫동안 안정적인 흐름을 유지하고 있습니다. 가계의 실질 구매력이 회복세를 보이고 있습니다.
+              물가 상승률이 중앙은행 목표 수준인 2% 근처에서 꾸준히 유지되고 있습니다. 임금이 오르는 속도가 물가보다 빨라지면서 가계의 실질 구매력도 회복되고 있습니다.
             </p>
           </div>
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>소비자물가 상승률(CPI) 추이 (%)</span>
-              <span class="text-emerald-400 font-bold">2.1% (안정)</span>
+              <span>소비자물가 상승률 (전년 대비, %)</span>
+              <span class="text-slate-200 font-bold">2.1%</span>
             </div>
             <svg class="w-full h-24" viewBox="0 0 300 100">
-              <line x1="10" y1="50" x2="290" y2="50" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4"/>
-              <path d="M 10 55 Q 80 48, 150 52 T 290 50" fill="none" stroke="#10b981" stroke-width="3"/>
+              <line x1="10" y1="50" x2="290" y2="50" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4"/>
+              <text x="12" y="44" font-size="9" fill="#64748b">목표 2%</text>
+              <path d="M 10 55 Q 80 46, 150 52 T 290 50" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="50" r="4" fill="#38bdf8"/>
             </svg>
           </div>
         </article>
@@ -695,25 +842,32 @@
         <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-teal-400 flex items-center gap-1">
-                <i class="fa-solid fa-briefcase"></i> 기업경영포커스
+              <span class="font-bold text-amber-300 flex items-center gap-1">
+                <i class="fa-solid fa-industry"></i> 산업경제리포트
               </span>
-              <span>202X.06.05 • 기업실적</span>
+              <span>202X.06.05 • 기업</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              주요 기업 영업이익 완만한 개선… 경제 연착륙 청신호
+              상장사 영업이익 8% 증가… 수출·내수 고르게 회복
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              과열이나 급격한 침체 없이 기업 실적이 전반적으로 완만하게 호조를 보이고 있습니다. 경제 성장률도 잠재성장률 수준을 견조하게 지키고 있습니다.
+              특정 업종에 쏠리지 않고 제조업과 서비스업 전반에서 실적이 조금씩 나아지고 있습니다. 올해 경제성장률은 2%대 중반으로 예상됩니다.
             </p>
           </div>
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>GDP 및 기업 이익 성장률</span>
-              <span class="text-teal-400 font-bold">+2.5% 완만한 증가</span>
+              <span>상장사 영업이익 증가율 (전년 대비, %)</span>
+              <span class="text-slate-200 font-bold">+8.0%</span>
             </div>
             <svg class="w-full h-24" viewBox="0 0 300 100">
-              <path d="M 10 70 L 90 60 L 170 45 L 290 30" fill="none" stroke="#14b8a6" stroke-width="3"/>
+              <rect x="30" y="70" width="45" height="20" rx="4" fill="#334155"/>
+              <rect x="100" y="56" width="45" height="34" rx="4" fill="#334155"/>
+              <rect x="170" y="46" width="45" height="44" rx="4" fill="#475569"/>
+              <rect x="240" y="34" width="45" height="56" rx="4" fill="#6366f1"/>
+              <text x="52.5" y="66" text-anchor="middle" font-size="10" fill="#94a3b8">2.1</text>
+              <text x="122.5" y="52" text-anchor="middle" font-size="10" fill="#94a3b8">4.5</text>
+              <text x="192.5" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">6.2</text>
+              <text x="262.5" y="30" text-anchor="middle" font-size="10" fill="#94a3b8">8.0</text>
             </svg>
           </div>
         </article>
@@ -722,26 +876,27 @@
         <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-green-400 flex items-center gap-1">
-                <i class="fa-solid fa-building-columns"></i> 중앙은행브리핑
+              <span class="font-bold text-indigo-300 flex items-center gap-1">
+                <i class="fa-solid fa-building-columns"></i> 중앙금융일보
               </span>
               <span>202X.06.10 • 통화정책</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              중앙은행 "당분간 기준금리 동결"… 금융시장 불확실성 소멸
+              중앙은행, 기준금리 연 2.50% 동결… "지금 수준이 적절"
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              경제 지표가 안정적인 궤도에 들어섬에 따라 통화당국이 금리를 인상하거나 인하할 필요 없이 동결 기조를 지속하겠다고 밝혔습니다.
+              중앙은행은 물가와 성장 모두 예상한 범위 안에서 움직이고 있다며 금리를 그대로 두기로 했습니다. 당분간 금리를 올리거나 내릴 계획이 없다고 밝혔습니다.
             </p>
           </div>
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>기준금리 동결 평행선</span>
-              <span class="text-green-400 font-bold">2.50% (동결)</span>
+              <span>기준금리 추이 (%)</span>
+              <span class="text-slate-200 font-bold">연 2.50%</span>
             </div>
             <svg class="w-full h-24" viewBox="0 0 300 100">
-              <line x1="10" y1="50" x2="290" y2="50" stroke="#22c55e" stroke-width="3"/>
-              <circle cx="290" cy="50" r="4" fill="#22c55e"/>
+              <line x1="10" y1="85" x2="290" y2="85" stroke="#334155"/>
+              <line x1="10" y1="50" x2="290" y2="50" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="50" r="4" fill="#38bdf8"/>
             </svg>
           </div>
         </article>
@@ -750,27 +905,28 @@
         <article class="news-card rounded-2xl p-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span class="font-bold text-emerald-300 flex items-center gap-1">
-                <i class="fa-solid fa-scale-balanced"></i> 종합자산투자가이드
+              <span class="font-bold text-teal-300 flex items-center gap-1">
+                <i class="fa-solid fa-newspaper"></i> 데일리경제
               </span>
-              <span>202X.06.15 • 자산시장</span>
+              <span>202X.06.15 • 고용/소비</span>
             </div>
             <h3 class="text-base md:text-lg font-bold text-slate-100 mb-2 leading-snug">
-              예금·주식·채권 시장 동반 안정세… 자산 시장 이상적 흐름
+              취업자 수 꾸준히 증가… 소비자심리지수 기준선 웃돌아
             </h3>
             <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">
-              급격한 시장 쏠림 없이 주식은 적정 상승을 유지하고, 예금과 채권도 안정적인 이자 수익을 안겨주는 골디락스 장세가 펼쳐지고 있습니다.
+              일자리가 안정적으로 늘면서 소비자들의 경기 전망도 밝아졌습니다. 소비자심리지수는 다섯 달째 기준선(100)을 넘었습니다.
             </p>
           </div>
           <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
             <div class="text-[10px] font-semibold text-slate-400 mb-1 flex justify-between">
-              <span>자산군별 균형 수익률 지수</span>
-              <span class="text-emerald-400 font-bold">고른 플러스 성과</span>
+              <span>소비자심리지수</span>
+              <span class="text-slate-200 font-bold">104.2</span>
             </div>
             <svg class="w-full h-24" viewBox="0 0 300 100">
-              <rect x="40" y="40" width="50" height="50" rx="3" fill="#10b981"/>
-              <rect x="125" y="25" width="50" height="65" rx="3" fill="#34d399"/>
-              <rect x="210" y="50" width="50" height="40" rx="3" fill="#059669"/>
+              <line x1="10" y1="60" x2="290" y2="60" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4"/>
+              <text x="12" y="74" font-size="9" fill="#64748b">기준선 100</text>
+              <path d="M 10 62 L 80 56 L 150 52 L 220 48 L 290 46" fill="none" stroke="#38bdf8" stroke-width="3"/>
+              <circle cx="290" cy="46" r="4" fill="#38bdf8"/>
             </svg>
           </div>
         </article>
@@ -782,10 +938,10 @@
   <!-- BOTTOM CONTROL BAR & TEACHER REVEAL PANEL -->
   <footer class="bg-slate-900/90 border-t border-slate-800 backdrop-blur-md sticky bottom-0 z-40 p-3">
     <div class="max-w-7xl mx-auto flex flex-col gap-3">
-      
+
       <!-- Primary Controls (Prev/Next + Reveal Button) -->
       <div class="flex items-center justify-between gap-2">
-        
+
         <!-- Previous Button -->
         <button onclick="prevSlide()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-medium transition text-xs sm:text-sm flex items-center gap-2 border border-slate-700">
           <i class="fa-solid fa-chevron-left"></i>
@@ -795,7 +951,7 @@
         <!-- Center: Teacher Reveal Button -->
         <button onclick="toggleAnswer()" id="reveal-btn" class="flex-1 max-w-md py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-indigo-950 transition-all flex items-center justify-center gap-2 border border-indigo-400/30">
           <i class="fa-solid fa-key text-amber-300"></i>
-          <span id="reveal-btn-text">🔒 [교사용] 시나리오 정답 및 수익률 공개</span>
+          <span id="reveal-btn-text">🔒 [교사용] 결과 보기 (정답 · 수익률 · AI 해설)</span>
         </button>
 
         <!-- Next Button -->
@@ -806,7 +962,7 @@
       </div>
 
       <!-- TEACHER ANSWER & RETURN SHEET (COLLAPSIBLE) -->
-      <div id="answer-sheet" class="hidden transition-all duration-300 bg-slate-950 border border-indigo-500/50 rounded-2xl p-4 shadow-2xl">
+      <div id="answer-sheet" class="hidden transition-all duration-300 bg-slate-950 border border-indigo-500/50 rounded-2xl p-4 shadow-2xl max-h-[60vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
           <div class="flex items-center gap-2">
             <span class="bg-indigo-600 text-white text-[10px] font-black px-2 py-0.5 rounded">
@@ -849,6 +1005,23 @@
             </div>
           </div>
         </div>
+
+        <!-- AI EXPLANATION -->
+        <div id="ai-section" onclick="finishAiExplanation()" class="mt-4 rounded-2xl border border-sky-500/30 bg-slate-900/80 p-3 sm:p-4 cursor-pointer" title="클릭하면 해설 전체를 바로 볼 수 있어요">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-robot text-white text-sm"></i>
+            </div>
+            <div>
+              <div class="text-sm font-black text-sky-300">AI 경제 해설</div>
+              <div class="text-[10px] text-slate-500">기사 속 단서를 하나씩 연결해 볼게요</div>
+            </div>
+          </div>
+          <div id="ai-loading" class="text-xs text-slate-400 py-2 hidden">
+            AI가 기사를 분석하고 있어요<span class="ai-dots"><span>.</span><span>.</span><span>.</span></span>
+          </div>
+          <div id="ai-body" class="space-y-3"></div>
+        </div>
       </div>
 
     </div>
@@ -866,6 +1039,22 @@
           dep: { val: "+5%", color: "text-emerald-400" },
           stk: { val: "-20%", color: "text-red-400" },
           bnd: { val: "-10%", color: "text-red-400" }
+        },
+        ai: {
+          summary: "물가가 크게 오르자 중앙은행이 금리를 올렸어요. 금리가 오르면 '돈을 맡기는 쪽'은 유리해지고, '돈을 빌린 쪽'과 '이미 발행된 채권'은 불리해져요.",
+          clues: [
+            { title: "장바구니 물가 6%대 상승", text: "물가가 너무 빨리 오르면 중앙은행은 금리를 올려 시중에 도는 돈을 줄이려고 해요. 앞으로 금리가 오를 것이라는 신호예요." },
+            { title: "기준금리 0.5%p 인상", text: "실제로 금리가 크게 올랐어요. '필요한 조치를 이어가겠다'는 말은 금리를 더 올릴 수도 있다는 뜻이에요." },
+            { title: "주택담보대출 금리 7% 육박", text: "대출 금리가 오를 때는 은행이 예금에 주는 이자도 함께 오르는 경우가 많아요. 반대로 빚이 있는 가계는 소비를 줄이게 돼요." },
+            { title: "기업들 투자 계획 연기", text: "이자 부담이 커지면 기업이 버는 돈이 줄어요. 기업의 이익 전망이 낮아지면 주가도 떨어지기 쉬워요." }
+          ],
+          chain: ["물가 급등", "기준금리 인상", "예금·대출 금리 상승", "기업 이자 부담↑ · 소비↓", "기업 이익 감소"],
+          assets: {
+            dep: "금리가 오르면서 예금 이자가 높아져, 세 자산 중 가장 안정적으로 수익을 냈어요.",
+            stk: "이자 부담과 소비 위축으로 기업 실적이 나빠질 것이라는 예상에 주가가 크게 떨어졌어요.",
+            bnd: "새로 발행되는 채권의 이자가 더 높아지자, 낮은 이자를 주는 기존 채권을 사려는 사람이 줄어 가격이 내려갔어요."
+          },
+          concept: "금리와 채권 가격은 시소처럼 반대로 움직여요. 금리 ↑ → 기존 채권 가격 ↓"
         }
       },
       {
@@ -876,6 +1065,22 @@
           dep: { val: "+1%", color: "text-slate-300" },
           stk: { val: "-10%", color: "text-red-400" },
           bnd: { val: "+15%", color: "text-cyan-400" }
+        },
+        ai: {
+          summary: "경기가 나빠지자 중앙은행이 금리를 내렸어요. 금리가 내려가면 예금 이자는 줄지만, 이미 발행된 채권의 가치는 올라가요.",
+          clues: [
+            { title: "청년 실업률 3년 만에 최고", text: "일자리가 줄면 소득이 줄고, 소비도 함께 줄어요. 경기가 가라앉고 있다는 신호예요." },
+            { title: "소매판매 4개 분기 연속 감소", text: "물건이 안 팔리면 기업 매출이 줄어요. 이럴 때 중앙은행은 경기를 살리려고 금리를 내릴 가능성이 커져요." },
+            { title: "기준금리 0.5%p 인하 + 추가 인하 시사", text: "금리가 내려가면 예금 이자도 낮아져요. '금리가 더 내려갈 것'이라는 전망은 채권을 판단하는 중요한 단서예요." },
+            { title: "상장사 실적 전망 하향", text: "기업 이익이 줄어들 것이라는 예상은 주가에 부담이 돼요." }
+          ],
+          chain: ["고용·소비 위축", "기업 실적 악화", "기준금리 인하", "시장 금리 하락", "기존 채권 가치 상승"],
+          assets: {
+            dep: "금리 인하로 예금 이자가 낮아져 수익이 거의 없었어요.",
+            stk: "불황으로 기업 실적이 나빠질 것이라는 예상에 주가가 약세를 보였어요.",
+            bnd: "새 채권의 이자가 낮아지자, 예전에 높은 이자로 발행된 채권을 사려는 사람이 늘어 가격이 크게 올랐어요."
+          },
+          concept: "금리 ↓ → 기존 채권 가격 ↑. 금리가 앞으로 더 내려갈 것 같을 때 채권의 인기가 높아져요."
         }
       },
       {
@@ -886,16 +1091,48 @@
           dep: { val: "+2%", color: "text-slate-300" },
           stk: { val: "+40%", color: "text-amber-400" },
           bnd: { val: "-5%", color: "text-red-400" }
+        },
+        ai: {
+          summary: "새로운 기술이 기업의 이익을 크게 늘렸어요. 기업이 앞으로 돈을 잘 벌 것으로 예상되면 그 기업의 주식을 사려는 사람이 많아져요.",
+          clues: [
+            { title: "AI 반도체 양산, 수출 역대 최고", text: "새 기술로 만든 제품이 잘 팔리면 기업의 매출과 이익이 늘어요." },
+            { title: "IT 기업 영업이익 2.5배", text: "주가는 기업의 이익을 따라가는 경향이 있어요. 이익 전망이 올라가면 주가도 오르기 쉬워요." },
+            { title: "개발자 채용 경쟁, 연봉 상승", text: "기업들이 사람을 더 뽑는다는 건 앞으로 사업이 더 커질 거라고 자신한다는 뜻이에요." },
+            { title: "투자 증가 + 시장 금리 상승 관측", text: "경기가 뜨거워지면 시장 금리가 오를 수 있어요. 금리가 오르면 기존 채권 가격은 내려가요. 또 더 높은 수익을 찾아 돈이 주식 쪽으로 옮겨가요." }
+          ],
+          chain: ["기술 혁신", "기업 이익 급증", "투자·고용 확대", "주식 선호 상승", "시장 금리 상승 압력"],
+          assets: {
+            dep: "금리가 크게 변하지 않아 예금은 평소 수준의 이자를 받았어요.",
+            stk: "기업 이익이 폭발적으로 늘자 주식을 사려는 돈이 몰려 크게 올랐어요.",
+            bnd: "돈이 주식으로 옮겨가고 시장 금리가 오를 것이라는 예상에 채권 가격이 조금 내렸어요."
+          },
+          concept: "주가는 '기업이 앞으로 벌어들일 이익'에 대한 기대를 반영해요."
         }
       },
       {
         id: 3,
         title: "🟣 금융 위기 (블랙 스완 패닉)",
-        desc: "대형 금융기관 도산 우려 등 예측 불가능한 충격으로 전 세계 증시가 폭락하고 신용 경색이 일어납니다. 주식과 채권 모두 매도세가 거세지며, 원금이 보장되는 시중은행 정기예금과 현금이 최고의 방어수단이 됩니다.",
+        desc: "대형 금융기관 도산 우려 등 예측 불가능한 충격으로 전 세계 증시가 폭락하고 신용 경색이 일어납니다. 주식은 투매가 쏟아지고 회사채 시장은 얼어붙지만, 원금이 보장되는 예금과 국채 같은 안전한 채권에는 돈이 몰려 최고의 방어수단이 됩니다.",
         rates: {
           dep: { val: "+2%", color: "text-emerald-400" },
           stk: { val: "-40%", color: "text-red-500 font-extrabold" },
           bnd: { val: "+5%", color: "text-cyan-400" }
+        },
+        ai: {
+          summary: "큰 금융회사의 부실이 전 세계 금융시장을 흔들었어요. 이럴 때 사람들은 '얼마나 벌까'보다 '내 돈을 지키는 것'을 먼저 생각해요.",
+          clues: [
+            { title: "대형 투자은행 파산 위기설", text: "금융회사들은 서로 돈을 주고받으며 얽혀 있어서, 한 곳이 무너지면 다른 곳도 손실을 볼 수 있어요. 위기의 시작 신호예요." },
+            { title: "금융회사 간 거래 중단, 회사채 발행 멈춤", text: "기업이 돈을 빌리지 못하면 사업을 이어가기 어려워요. 기업이 발행하는 회사채는 위험하다고 여겨져 피하게 돼요." },
+            { title: "해외 주문 취소, 구조조정 검토", text: "기업 실적이 크게 나빠질 수 있다는 신호예요. 사람들이 위험한 자산부터 팔기 시작해요." },
+            { title: "긴급 금리 인하 + 예금자보호", text: "예금은 법으로 보호되니 안전해요. 또 금리가 내려가면 나라가 발행한 안전한 채권(국채)의 가격은 올라가요." }
+          ],
+          chain: ["대형 금융회사 부실", "금융회사 간 불신", "기업 자금줄 막힘", "위험자산 매도", "안전한 곳으로 돈 이동"],
+          assets: {
+            dep: "예금자보호제도 덕분에 원금이 안전하게 지켜졌고, 적지만 이자도 받았어요.",
+            stk: "기업이 무너질 수 있다는 공포에 주식을 팔려는 사람이 몰려 가장 크게 떨어졌어요.",
+            bnd: "회사채는 얼어붙었지만, 국채처럼 안전한 채권에 돈이 몰리고 금리도 내려가 채권 전체로는 조금 올랐어요."
+          },
+          concept: "위기 때는 수익보다 '잃지 않는 것'이 중요해져요. 이것을 '안전자산 선호'라고 해요."
         }
       },
       {
@@ -906,12 +1143,29 @@
           dep: { val: "+3%", color: "text-emerald-400" },
           stk: { val: "+15%", color: "text-emerald-400" },
           bnd: { val: "+5%", color: "text-emerald-400" }
+        },
+        ai: {
+          summary: "물가는 안정되고 경제는 적당히 성장했어요. 너무 뜨겁지도 차갑지도 않은 경제에서는 모든 자산이 고르게 수익을 낼 수 있어요.",
+          clues: [
+            { title: "소비자물가 2% 안팎 유지", text: "물가가 안정되면 중앙은행이 금리를 급하게 올리거나 내릴 필요가 없어요." },
+            { title: "상장사 영업이익 8% 증가", text: "기업 이익이 꾸준히 늘면 주가도 완만하게 오르기 쉬워요. 다만 폭발적인 성장은 아니에요." },
+            { title: "기준금리 동결", text: "금리가 그대로라 예금 이자가 유지되고, 채권 가격도 크게 흔들리지 않아요." },
+            { title: "취업자 증가, 소비심리 개선", text: "일자리와 소비가 함께 늘어나는 건 경제가 건강하게 성장하고 있다는 뜻이에요." }
+          ],
+          chain: ["물가 안정", "금리 동결", "기업 이익 완만한 증가", "고용·소비 개선", "자산 고른 상승"],
+          assets: {
+            dep: "금리가 유지되어 예금은 꾸준한 이자를 받았어요.",
+            stk: "기업 실적이 고르게 좋아져 주가가 안정적으로 올랐어요.",
+            bnd: "금리가 안정되어 채권은 이자 수익과 함께 소폭의 가격 상승을 얻었어요."
+          },
+          concept: "이런 경제를 동화 속 '딱 알맞은 온도의 죽'에 빗대 '골디락스'라고 불러요."
         }
       }
     ];
 
     let currentSlide = 0;
     let isAnswerOpen = false;
+    let aiTimers = [];
 
     // Show Slide Function
     function goToSlide(index) {
@@ -985,11 +1239,113 @@
         bndEl.className = `text-sm sm:text-base font-black ${curData.rates.bnd.color}`;
 
         sheet.classList.remove('hidden');
-        btnText.innerText = "🔓 정답 및 수익률 숨기기";
+        sheet.scrollTop = 0;
+        btnText.innerText = "🔓 결과 숨기기";
+        playAiExplanation(curData);
       } else {
+        stopAiExplanation();
         sheet.classList.add('hidden');
-        btnText.innerText = "🔒 [교사용] 시나리오 정답 및 수익률 공개";
+        btnText.innerText = "🔒 [교사용] 결과 보기 (정답 · 수익률 · AI 해설)";
       }
+    }
+
+    // AI Explanation
+    function createEl(tag, className, text) {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      if (text !== undefined) el.textContent = text;
+      return el;
+    }
+
+    function buildAiBlocks(data) {
+      const ai = data.ai;
+      const blocks = [];
+
+      // 1. 한 줄 요약
+      blocks.push(createEl('div', 'ai-step ai-bubble', ai.summary));
+
+      // 2. 기사별 단서
+      const clueBlock = createEl('div', 'ai-step');
+      clueBlock.appendChild(createEl('div', 'ai-heading', '📰 기사별 단서 읽기'));
+      const clueGrid = createEl('div', 'ai-clue-grid');
+      ai.clues.forEach((clue, i) => {
+        const card = createEl('div', 'ai-clue');
+        const head = createEl('div', 'ai-clue-title');
+        head.appendChild(createEl('span', 'ai-tag', `기사 ${i + 1}`));
+        head.appendChild(document.createTextNode(clue.title));
+        card.appendChild(head);
+        card.appendChild(createEl('div', 'ai-clue-text', clue.text));
+        clueGrid.appendChild(card);
+      });
+      clueBlock.appendChild(clueGrid);
+      blocks.push(clueBlock);
+
+      // 3. 생각의 흐름
+      const chainBlock = createEl('div', 'ai-step');
+      chainBlock.appendChild(createEl('div', 'ai-heading', '🔗 생각의 흐름'));
+      const chain = createEl('div', 'ai-chain');
+      ai.chain.forEach((step, i) => {
+        if (i > 0) chain.appendChild(createEl('span', 'ai-arrow', '→'));
+        chain.appendChild(createEl('span', 'ai-chip', step));
+      });
+      chainBlock.appendChild(chain);
+      blocks.push(chainBlock);
+
+      // 4. 자산별 결과 이유
+      const assetBlock = createEl('div', 'ai-step');
+      assetBlock.appendChild(createEl('div', 'ai-heading', '📊 자산별 결과, 왜 그럴까?'));
+      const assetList = createEl('div', 'ai-asset-list');
+      [
+        { key: 'dep', label: '🏦 예금' },
+        { key: 'stk', label: '📈 주식' },
+        { key: 'bnd', label: '📜 채권' }
+      ].forEach(({ key, label }) => {
+        const row = createEl('div', 'ai-asset');
+        const labelEl = createEl('div', 'ai-asset-label', `${label} `);
+        labelEl.appendChild(createEl('span', data.rates[key].color, data.rates[key].val));
+        row.appendChild(labelEl);
+        row.appendChild(createEl('div', '', ai.assets[key]));
+        assetList.appendChild(row);
+      });
+      assetBlock.appendChild(assetList);
+      blocks.push(assetBlock);
+
+      // 5. 핵심 개념
+      blocks.push(createEl('div', 'ai-step ai-concept', `💡 핵심 개념 · ${ai.concept}`));
+
+      return blocks;
+    }
+
+    function stopAiExplanation() {
+      aiTimers.forEach(clearTimeout);
+      aiTimers = [];
+    }
+
+    function playAiExplanation(data) {
+      stopAiExplanation();
+      const loading = document.getElementById('ai-loading');
+      const body = document.getElementById('ai-body');
+
+      body.replaceChildren(...buildAiBlocks(data));
+      body.classList.add('hidden');
+      loading.classList.remove('hidden');
+
+      aiTimers.push(setTimeout(() => {
+        loading.classList.add('hidden');
+        body.classList.remove('hidden');
+        Array.from(body.children).forEach((block, i) => {
+          aiTimers.push(setTimeout(() => block.classList.add('show'), 50 + i * 450));
+        });
+      }, 1200));
+    }
+
+    // Click on the AI panel to skip the animation
+    function finishAiExplanation() {
+      stopAiExplanation();
+      document.getElementById('ai-loading').classList.add('hidden');
+      const body = document.getElementById('ai-body');
+      body.classList.remove('hidden');
+      Array.from(body.children).forEach(block => block.classList.add('show'));
     }
 
     // Toggle Fullscreen
