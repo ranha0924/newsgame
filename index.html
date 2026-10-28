@@ -173,6 +173,29 @@
       list-style: disc;
       padding-left: 1.2em;
     }
+    .ai-principles li + li {
+      margin-top: 4px;
+    }
+    .ai-principle-label {
+      margin-right: 6px;
+      color: #fef3c7;
+    }
+    .ai-note {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: #e0e7ff;
+      background: rgba(79, 70, 229, 0.15);
+      border: 1px solid rgba(129, 140, 248, 0.3);
+      border-radius: 12px;
+      padding: 8px 12px;
+    }
+    .ai-bond-note {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
     .ai-dots span {
       animation: ai-blink 1.2s infinite both;
     }
@@ -1086,6 +1109,7 @@
     // Scenario Master Data
     // 결과(해설·AI 설명)는 기사에 나온 사실과 기본 경제 원리만으로 추론할 수 있는 내용만 담는다.
     // evidence: 근거가 되는 기사 번호 (슬라이드의 기사 순서 1~4)
+    // principles: 공통 원리(AI_COMMON_PRINCIPLES) 외에 이 시나리오에서 추가로 쓴 원리
     const scenarios = [
       {
         id: 0,
@@ -1106,14 +1130,13 @@
           ],
           chain: ["물가 6.2% 상승", "기준금리 연 4.75%", "은행 금리 상승", "기업 이자 부담↑ · 소비↓", "기업 이익 전망 -20%"],
           assets: {
-            dep: { text: "기준금리가 연 4.75%까지 올랐어요. 예금 이자는 기준금리 수준을 따라가므로 약 5%의 이자를 받을 수 있어요.", evidence: [2, 3] },
-            stk: { text: "상장사 이익 전망치가 연초보다 20% 줄었어요. 주가는 기업 이익 전망을 따라가므로 20% 안팎 떨어졌어요.", evidence: [4] },
-            bnd: { text: "금리가 1%p 오르고 추가 인상까지 예고됐어요. 이자를 더 주는 새 채권이 나오니 기존 채권 가격이 떨어져, 이자를 받고도 전체로는 손실이 났어요.", evidence: [2] }
+            dep: { text: "기사 2에서 기준금리가 연 4.75%까지 올랐어요. 기사 3의 대출금리 7% 육박도 은행 금리가 전반적으로 올랐다는 증거예요. 그래서 예금 이자는 약 5%예요.", evidence: [2, 3] },
+            stk: { text: "기사 4에서 상장사 이익 전망이 연초보다 20% 줄었어요. 물가 상승(기사 1)과 이자 부담(기사 3)으로 소비와 투자가 위축된 결과예요.", evidence: [1, 3, 4] },
+            bnd: { text: "기사 2에서 금리가 올해 1%p 올랐고 추가 인상도 예고됐어요. 기존 채권 가격이 떨어져, 이자를 받고도 전체로는 손실이에요.", evidence: [2] }
           },
+          note: "세 자산 중 유일하게 플러스인 예금이 이 시기의 승자예요.",
           principles: [
-            "기준금리가 오르면 예금·대출 금리도 함께 오른다.",
-            "주가는 기업의 이익 전망을 따라 움직인다.",
-            "금리가 오르면 이미 발행된 채권의 가격은 내려간다."
+            "물가가 빠르게 오르면 중앙은행은 기준금리를 올려 물가를 잡으려 해요."
           ]
         }
       },
@@ -1136,14 +1159,13 @@
           ],
           chain: ["고용·소비 위축", "기업 이익 전망 -10%", "기준금리 연 1.00%", "추가 인하 전망", "기존 채권 가치 상승"],
           assets: {
-            dep: { text: "기준금리가 연 1.00%로 내려가 예금 이자도 약 1%로 줄었어요.", evidence: [3] },
-            stk: { text: "상장사 이익 전망치가 10% 낮아졌어요. 주가도 이익 전망을 따라 10% 안팎 떨어졌어요.", evidence: [1, 2, 4] },
-            bnd: { text: "금리가 1%p 내렸고 앞으로 더 내려갈 전망이에요. 예전에 높은 이자로 발행된 채권의 인기가 높아져 가격이 크게 올랐어요.", evidence: [3] }
+            dep: { text: "기사 3에서 기준금리가 연 1.00%로 내려가 예금 이자도 약 1%로 줄었어요.", evidence: [3] },
+            stk: { text: "기사 4에서 하반기 이익 전망이 석 달 새 10% 낮아졌어요. 실업률 상승(기사 1)과 소비 감소(기사 2)가 원인이에요.", evidence: [1, 2, 4] },
+            bnd: { text: "기사 3에서 금리가 1%p 내렸고, 총재 발언으로 추가 인하 전망까지 나왔어요. 금리가 계속 내려갈 것으로 보이면 기존 채권 가격이 크게 올라요.", evidence: [3] }
           },
+          note: "금리가 계속 내려가는 시기에는 채권이 세 자산 중 가장 높은 수익을 내요.",
           principles: [
-            "경기가 나빠지면 중앙은행은 금리를 내려 경기를 살리려 한다.",
-            "주가는 기업의 이익 전망을 따라 움직인다.",
-            "금리가 내리면 이미 발행된 채권의 가격은 올라간다."
+            "경기가 나빠지면 중앙은행은 기준금리를 내려 경기를 살리려 해요."
           ]
         }
       },
@@ -1166,15 +1188,12 @@
           ],
           chain: ["기술 혁신", "기업 이익 급증", "상장사 이익 전망 +40%", "투자·고용 확대", "시장 금리 상승 가능성"],
           assets: {
-            dep: { text: "기준금리가 연 1.75%로 유지돼, 예금은 약 2%의 평범한 이자를 받았어요.", evidence: [4] },
-            stk: { text: "상장사 전체 이익 전망치가 40% 올라갔어요. 주가도 이익 전망을 따라 40% 안팎 올랐어요.", evidence: [1, 2, 3] },
-            bnd: { text: "시장 금리가 오를 수 있다는 전망에 기존 채권 가격이 조금 내려, 이자를 받고도 소폭 손실이 났어요.", evidence: [4] }
+            dep: { text: "기사 4에서 기준금리가 연 1.75%로 그대로라 평범한 이자(약 2%)를 받아요.", evidence: [4] },
+            stk: { text: "기사 2에서 상장사 전체 이익 전망이 40% 올랐어요. 기사 1(반도체 수출 최고)과 기사 3(채용 확대)이 이 전망을 뒷받침해요.", evidence: [1, 2, 3] },
+            bnd: { text: "기사 4에서 '경기가 달아오르면 시장 금리가 오를 수 있다'는 전망이 나왔어요. 금리가 실제로 오른 게 아니라 오를 거라는 예상이라, 시나리오 1(-10%)보다 손실이 작아요.", evidence: [4] }
           },
-          principles: [
-            "주가는 기업의 이익 전망을 따라 움직인다.",
-            "예금 이자는 기준금리 수준을 따라간다.",
-            "금리가 오를 것으로 예상되면 이미 발행된 채권의 가격은 내려간다."
-          ]
+          note: "IT 기업의 +150%가 아니라 상장사 전체 숫자(+40%)를 봐야 해요. 주식 투자 수익은 시장 전체 흐름을 따르기 때문이에요.",
+          principles: []
         }
       },
       {
@@ -1196,15 +1215,14 @@
           ],
           chain: ["투자은행 파산 위기", "금융회사 간 불신", "회사채 시장 마비", "기업 이익 전망 -40%", "긴급 금리 인하 · 예금 보호"],
           assets: {
-            dep: { text: "예금은 예금자보호제도로 원금이 보호돼 안전했고, 기준금리(연 1.75%) 수준인 약 2%의 이자를 받았어요.", evidence: [4] },
-            stk: { text: "상장사 이익 전망치가 한 달 새 40% 줄었어요. 주가도 이익 전망을 따라 40% 안팎 떨어졌어요.", evidence: [1, 3] },
-            bnd: { text: "금리가 1%p 내려 나라가 발행한 안전한 채권(국채)은 가격이 올랐지만, 회사채 시장은 얼어붙었어요. 둘이 섞여 채권 전체로는 소폭 오르는 데 그쳤어요.", evidence: [2, 4] }
+            dep: { text: "기사 4에서 기준금리가 연 1.75%로 내려갔고, 정부가 예금은 법으로 보호된다고 밝혔어요. 원금은 안전하고 이자는 약 2%예요.", evidence: [4] },
+            stk: { text: "기사 3에서 이익 전망이 한 달 새 40% 줄었어요. 투자은행 파산 위기(기사 1) → 기업 자금줄 막힘(기사 2) → 주문 취소(기사 3)로 이어진 결과예요.", evidence: [1, 2, 3] },
+            bnd: { text: "두 힘이 섞였어요. 기사 4의 1%p 긴급 인하로 나라가 발행한 안전한 채권(국채)은 가격이 오르지만, 기사 2처럼 회사채 시장은 마비돼 회사채는 불리해요.", evidence: [2, 4] }
           },
+          note: "시나리오 2와 같은 1%p 인하인데 채권 수익(+5%)이 +15%보다 작은 이유는, 회사채 위험이 있고 추가 인하 전망도 기사에 없기 때문이에요.",
           principles: [
-            "예금은 예금자보호제도로 원금이 보호된다.",
-            "위기 때는 위험한 자산을 팔고 안전한 자산(예금·국채)을 찾는다.",
-            "주가는 기업의 이익 전망을 따라 움직인다.",
-            "금리가 내리면 이미 발행된 채권의 가격은 올라간다."
+            "예금은 예금자보호제도로 원금이 보호돼요.",
+            "위기 때는 위험한 자산을 팔고 안전한 자산(예금·국채)을 찾아요."
           ]
         }
       },
@@ -1227,18 +1245,25 @@
           ],
           chain: ["물가 2% 안정", "기준금리 2.75% 동결", "시장금리 안정", "기업 이익 +15%", "고용·소비 개선"],
           assets: {
-            dep: { text: "기준금리가 연 2.75%로 동결돼, 예금은 약 3%의 이자를 꾸준히 받았어요.", evidence: [3] },
-            stk: { text: "상장사 영업이익이 15% 늘어날 전망이에요. 주가도 이익을 따라 15% 안팎 올랐어요.", evidence: [2, 4] },
-            bnd: { text: "시장금리가 안정돼 채권 가격은 크게 변하지 않았어요. 채권은 예금보다 위험이 조금 더 있는 대신 이자가 조금 더 높아, 예금보다 약간 높은 수익을 냈어요.", evidence: [3] }
+            dep: { text: "기사 3에서 기준금리가 연 2.75%로 동결돼 이자가 약 3%예요.", evidence: [3] },
+            stk: { text: "기사 2에서 상장사 이익이 15% 늘어날 전망이에요. 기사 4의 고용·소비 개선이 이를 뒷받침해요.", evidence: [2, 4] },
+            bnd: { text: "기사 3에서 시장금리가 안정적이라 가격 변화가 거의 없고, 수익은 대부분 이자예요.", evidence: [3] }
           },
+          note: "채권(+5%)이 예금(+3%)보다 높은 이유는 기사 숫자가 아니라 원리에서 나와요. 채권은 예금보다 위험이 조금 더 있는 대신 이자가 조금 더 높아요.",
           principles: [
-            "물가가 안정되면 금리도 크게 움직이지 않는다.",
-            "주가는 기업의 이익 전망을 따라 움직인다.",
-            "위험이 클수록 기대 수익도 크다: 예금 < 채권 < 주식"
+            "위험이 클수록 기대 수익도 커요: 예금 < 채권 < 주식"
           ]
         }
       }
     ];
+
+    // 모든 시나리오에 공통으로 쓰는 수익률 읽기 원리
+    const AI_COMMON_PRINCIPLES = [
+      { label: "🏦 예금", text: "예금 이자는 중앙은행 기준금리를 따라 움직여요. 기사 속 기준금리를 반올림하면 예금 수익률이 돼요." },
+      { label: "📈 주식", text: "주가는 기업이 앞으로 벌 이익에 대한 기대를 따라가요. 기사 속 상장사 영업이익 전망치가 변한 만큼 주식 수익률이 움직여요." },
+      { label: "📜 채권", text: "채권 수익은 '이자 + 가격 변화'예요. 이자 3%짜리 채권을 갖고 있는데 금리가 5%로 오르면, 새 채권이 5%를 주니까 내 채권은 싸게 팔아야 해서 가격이 떨어져요. 반대로 금리가 내리면 예전에 높은 이자로 발행된 채권이 귀해져 가격이 올라요. 금리가 많이 움직일수록, 계속 움직일 것 같을수록 가격 변화도 커요." }
+    ];
+    const AI_BOND_NOTE = "채권의 정확한 숫자(-10%, +15% 등)는 기사만으로 계산할 수 없어요. 방향(+/-)과 대략적인 크기, 다른 자산과의 순위를 맞혔다면 잘 추론한 거예요.";
 
     let currentSlide = 0;
     let isAnswerOpen = false;
@@ -1370,7 +1395,7 @@
 
       // 4. 자산별 결과 이유
       const assetBlock = createEl('div', 'ai-step');
-      assetBlock.appendChild(createEl('div', 'ai-heading', '📊 자산별 결과, 왜 그럴까?'));
+      assetBlock.appendChild(createEl('div', 'ai-heading', '📊 자산별 수익률, 왜 이 값일까?'));
       const assetList = createEl('div', 'ai-asset-list');
       [
         { key: 'dep', label: '🏦 예금' },
@@ -1387,14 +1412,22 @@
         assetList.appendChild(row);
       });
       assetBlock.appendChild(assetList);
+      if (ai.note) assetBlock.appendChild(createEl('div', 'ai-note', `💬 ${ai.note}`));
       blocks.push(assetBlock);
 
-      // 5. 추론에 쓴 경제 원리
+      // 5. 수익률을 읽는 원리 (공통 원리 + 이 시나리오에서 추가로 쓴 원리)
       const principleBlock = createEl('div', 'ai-step ai-concept');
-      principleBlock.appendChild(createEl('div', 'ai-concept-title', '💡 추론에 쓴 경제 원리'));
+      principleBlock.appendChild(createEl('div', 'ai-concept-title', '💡 수익률을 읽는 원리'));
       const principleList = createEl('ul', 'ai-principles');
+      AI_COMMON_PRINCIPLES.forEach(({ label, text }) => {
+        const item = createEl('li');
+        item.appendChild(createEl('strong', 'ai-principle-label', label));
+        item.appendChild(document.createTextNode(text));
+        principleList.appendChild(item);
+      });
       ai.principles.forEach(text => principleList.appendChild(createEl('li', '', text)));
       principleBlock.appendChild(principleList);
+      principleBlock.appendChild(createEl('div', 'ai-bond-note', `ⓘ ${AI_BOND_NOTE}`));
       blocks.push(principleBlock);
 
       return blocks;
