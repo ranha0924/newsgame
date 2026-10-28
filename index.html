@@ -242,13 +242,22 @@
     .art-graphic { margin-top: 14px; padding-top: 6px; border-top: 2px solid var(--ink); }
     .graphic-head {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
-      gap: 8px;
+      align-items: baseline;
+      gap: 2px 10px;
       font-family: var(--sans);
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 15px;
+      font-weight: 800;
     }
-    .graphic-head .val { color: var(--accent); white-space: nowrap; }
+    .graphic-head .val { font-size: 17px; color: var(--accent); white-space: nowrap; }
+    .graphic-sub {
+      margin-top: 2px;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
     .art-graphic svg { display: block; width: 100%; height: auto; font-family: var(--sans); }
 
     /* ── 오늘의 토론 ── */
@@ -389,10 +398,13 @@
     }
     .reader-media, .reader-text { min-height: 0; overflow: hidden; }
     .reader-media .art-photo { margin-bottom: 10px; }
-    .reader-media .art-photo img { max-height: calc(52vh * var(--rs)); }
+    .reader-media .art-photo img { max-height: calc(44vh * var(--rs)); }
     .reader-media .art-photo figcaption { font-size: calc(13px * var(--rs)); }
     .reader-media .art-graphic { margin-top: 8px; }
-    .reader-media .art-graphic svg { width: auto; max-width: 100%; max-height: calc(25vh * var(--rs)); margin: 0 auto; }
+    .reader-media .art-graphic svg { width: auto; max-width: 100%; max-height: calc(28vh * var(--rs)); margin: 0 auto; }
+    .reader .graphic-head { font-size: calc(16px * var(--rs)); }
+    .reader .graphic-head .val { font-size: calc(19px * var(--rs)); }
+    .reader .graphic-sub { font-size: calc(14px * var(--rs)); }
     .reader .kicker { font-size: calc(13px * var(--rs)); }
     .reader .art-headline { font-size: calc(clamp(24px, 4.4vh, 44px) * var(--rs)); font-weight: 900; line-height: 1.25; }
     .reader .art-deck { font-size: calc(clamp(15px, 2.3vh, 20px) * var(--rs)); margin: calc(14px * var(--rs)) 0 calc(10px * var(--rs)); }
@@ -659,45 +671,48 @@
 
   <script>
     // ── 신문 그래픽(차트) ──
+    // 글자 크기는 viewBox(320 너비) 기준이다. 지면 한 칸(약 360px)에서 숫자 약 17px, 날짜 약 15px로 보인다.
     const INK = {
       line: '#23395d', bar: '#bfb7a5', barMid: '#a1998a', barHi: '#23395d',
-      axis: '#7d7666', guide: '#9c9480', label: '#4f4a40', faint: '#857e6d'
+      axis: '#7d7666', guide: '#8f8774', label: '#3f3a31', faint: '#5a5446'
     };
-    const GW = 320, GH = 140;
+    const GW = 320, GH = 172;
+    const FONT = { value: 15, label: 13 };
 
     function svgWrap(inner) {
       return `<svg viewBox="0 0 ${GW} ${GH}" aria-hidden="true">${inner}</svg>`;
     }
-    function svgText(x, y, text, { size = 10, anchor = 'middle', fill = INK.label, weight = 400 } = {}) {
+    function svgText(x, y, text, { size = FONT.value, anchor = 'middle', fill = INK.label, weight = 600 } = {}) {
       return `<text x="${x}" y="${y}" font-size="${size}" text-anchor="${anchor}" fill="${fill}" font-weight="${weight}">${text}</text>`;
     }
-    function xSpread(n, left = 34, right = GW - 34) {
+    function xSpread(n, left = 30, right = GW - 30) {
       return Array.from({ length: n }, (_, i) => (n === 1 ? (left + right) / 2 : left + (right - left) * i / (n - 1)));
     }
 
     function barChart({ values, labels }) {
-      const n = values.length, left = 18, right = GW - 18;
-      const slot = (right - left) / n, bw = Math.min(44, slot * 0.56);
+      const n = values.length, left = 10, right = GW - 10;
+      const slot = (right - left) / n, bw = Math.min(48, slot * 0.6);
       const fillAt = i => (i === n - 1 ? INK.barHi : i === n - 2 ? INK.barMid : INK.bar);
+      const valueStyle = i => ({ weight: i === n - 1 ? 800 : 600, fill: i === n - 1 ? INK.line : INK.label });
       let out = '';
       if (values.every(v => v <= 0)) {
-        // 감소폭 막대: 0 기준선에서 아래로
-        const zero = 30, maxH = 72, min = Math.min(...values);
+        // 감소폭 막대: 0 기준선에서 아래로, 날짜는 기준선 위에
+        const zero = 40, maxH = 100, min = Math.min(...values);
         out += `<line x1="${left}" y1="${zero}" x2="${right}" y2="${zero}" stroke="${INK.axis}"/>`;
         values.forEach((v, i) => {
           const h = (v / min) * maxH, x = left + slot * i + (slot - bw) / 2, cx = x + bw / 2;
           out += `<rect x="${x}" y="${zero}" width="${bw}" height="${h}" fill="${fillAt(i)}"/>`;
-          out += svgText(cx, zero + h + 13, v, { weight: i === n - 1 ? 700 : 400, fill: i === n - 1 ? INK.line : INK.label });
-          out += svgText(cx, zero - 8, labels[i], { size: 9.5, fill: INK.faint });
+          out += svgText(cx, zero + h + 19, v, valueStyle(i));
+          out += svgText(cx, zero - 12, labels[i], { size: FONT.label, fill: INK.faint, weight: 500 });
         });
       } else {
-        const base = 112, top = 24, max = Math.max(...values);
+        const base = 140, top = 34, max = Math.max(...values);
         out += `<line x1="${left}" y1="${base}" x2="${right}" y2="${base}" stroke="${INK.axis}"/>`;
         values.forEach((v, i) => {
           const h = (v / max) * (base - top), x = left + slot * i + (slot - bw) / 2, cx = x + bw / 2;
           out += `<rect x="${x}" y="${base - h}" width="${bw}" height="${h}" fill="${fillAt(i)}"/>`;
-          out += svgText(cx, base - h - 5, v, { weight: i === n - 1 ? 700 : 400, fill: i === n - 1 ? INK.line : INK.label });
-          out += svgText(cx, base + 15, labels[i], { size: 9.5, fill: INK.faint });
+          out += svgText(cx, base - h - 7, v, valueStyle(i));
+          out += svgText(cx, base + 22, labels[i], { size: FONT.label, fill: INK.faint, weight: 500 });
         });
       }
       return svgWrap(out);
@@ -712,43 +727,56 @@
     }
 
     function lineChart({ values, labels, ref }) {
-      const top = 20, base = 104, xs = xSpread(values.length), y = scaleY(values, ref, top, base);
-      let out = `<line x1="18" y1="${base + 6}" x2="${GW - 18}" y2="${base + 6}" stroke="${INK.axis}"/>`;
-      if (ref) {
-        out += `<line x1="18" y1="${y(ref.value)}" x2="${GW - 18}" y2="${y(ref.value)}" stroke="${INK.guide}" stroke-dasharray="4,3"/>`;
-        out += svgText(GW - 18, y(ref.value) - 5, ref.label, { size: 9.5, anchor: 'end', fill: INK.faint });
-      }
-      out += `<polyline points="${xs.map((x, i) => `${x},${y(values[i])}`).join(' ')}" fill="none" stroke="${INK.line}" stroke-width="2.5" stroke-linejoin="round"/>`;
+      const n = values.length, top = 34, base = 124, xs = xSpread(n), y = scaleY(values, ref, top, base);
+      let out = `<line x1="12" y1="${base + 16}" x2="${GW - 12}" y2="${base + 16}" stroke="${INK.axis}"/>`;
+      if (ref) out += `<line x1="12" y1="${y(ref.value)}" x2="${GW - 12}" y2="${y(ref.value)}" stroke="${INK.guide}" stroke-width="1.5" stroke-dasharray="5,4"/>`;
+      out += `<polyline points="${xs.map((x, i) => `${x},${y(values[i])}`).join(' ')}" fill="none" stroke="${INK.line}" stroke-width="3" stroke-linejoin="round"/>`;
       values.forEach((v, i) => {
-        const last = i === values.length - 1;
-        out += `<circle cx="${xs[i]}" cy="${y(v)}" r="${last ? 4 : 2.5}" fill="${INK.line}"/>`;
-        if (i === 0 || last) out += svgText(xs[i], y(v) - 9, v, { weight: last ? 700 : 400, fill: last ? INK.line : INK.label });
-        out += svgText(xs[i], base + 21, labels[i], { size: 9.5, fill: INK.faint });
+        const last = i === n - 1;
+        out += `<circle cx="${xs[i]}" cy="${y(v)}" r="${last ? 5 : 3.5}" fill="${INK.line}"/>`;
+        out += svgText(xs[i], base + 38, labels[i], { size: FONT.label, fill: INK.faint, weight: 500 });
       });
+      // 처음·마지막 값: 선이 지나가는 쪽을 피해 위나 아래에 쓴다.
+      const firstBelow = values[1] > values[0];
+      const lastBelow = values[n - 2] > values[n - 1];
+      out += svgText(xs[0], y(values[0]) + (firstBelow ? 22 : -12), values[0]);
+      out += svgText(xs[n - 1], y(values[n - 1]) + (lastBelow ? 22 : -12), values[n - 1], { weight: 800, fill: INK.line });
       return svgWrap(out);
     }
 
     function stepChart({ values, labels }) {
-      const top = 30, base = 100, xs = xSpread(values.length, 30, GW - 70), right = GW - 22;
+      const top = 44, base = 112, xs = xSpread(values.length, 22, GW - 92), right = GW - 18;
       const y = scaleY(values, null, top, base);
       let d = `M ${xs[0]} ${y(values[0])}`;
       for (let i = 1; i < values.length; i++) d += ` L ${xs[i]} ${y(values[i - 1])} L ${xs[i]} ${y(values[i])}`;
       d += ` L ${right} ${y(values[values.length - 1])}`;
-      let out = `<line x1="18" y1="${base + 12}" x2="${GW - 18}" y2="${base + 12}" stroke="${INK.axis}"/>`;
-      out += `<path d="${d}" fill="none" stroke="${INK.line}" stroke-width="2.5"/>`;
-      out += `<circle cx="${right}" cy="${y(values[values.length - 1])}" r="4" fill="${INK.line}"/>`;
+      let out = `<line x1="12" y1="${base + 20}" x2="${GW - 12}" y2="${base + 20}" stroke="${INK.axis}"/>`;
+      out += `<path d="${d}" fill="none" stroke="${INK.line}" stroke-width="3"/>`;
+      out += `<circle cx="${right}" cy="${y(values[values.length - 1])}" r="5" fill="${INK.line}"/>`;
       values.forEach((v, i) => {
         const end = i === values.length - 1 ? right : xs[i + 1];
         const last = i === values.length - 1;
-        out += svgText((xs[i] + end) / 2, y(v) - 8, v.toFixed(2), { weight: last ? 700 : 400, fill: last ? INK.line : INK.label });
-        out += svgText(xs[i], base + 27, labels[i], { size: 9.5, anchor: 'start', fill: INK.faint });
+        out += svgText((xs[i] + end) / 2, y(v) - 11, v.toFixed(2), { weight: last ? 800 : 600, fill: last ? INK.line : INK.label });
+        out += svgText(xs[i], base + 42, labels[i], { size: FONT.label, anchor: 'start', fill: INK.faint, weight: 500 });
       });
       return svgWrap(out);
     }
 
+    // "소비자물가 상승률 (전년 대비, %)" → 제목 "소비자물가 상승률", 보조줄 "전년 대비 · 단위: %"
+    function splitTitle(title) {
+      const m = title.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+      if (!m) return { name: title, notes: [] };
+      const parts = m[2].split(',').map(s => s.trim());
+      const unit = parts.pop();
+      return { name: m[1], notes: [...parts, `단위: ${unit}`] };
+    }
+
     function renderGraphic(g) {
       const svg = g.type === 'bar' ? barChart(g) : g.type === 'step' ? stepChart(g) : lineChart(g);
-      return `<div class="art-graphic"><div class="graphic-head"><span>${g.title}</span><span class="val">${g.value}</span></div>${svg}</div>`;
+      const { name, notes } = splitTitle(g.title);
+      if (g.ref) notes.push(`점선: ${g.ref.label}`);
+      const sub = notes.length ? `<div class="graphic-sub">${notes.join(' · ')}</div>` : '';
+      return `<div class="art-graphic"><div class="graphic-head"><span>${name}</span><span class="val">${g.value}</span></div>${sub}${svg}</div>`;
     }
 
     // ── 지면 데이터 (시나리오별 1면) ──
