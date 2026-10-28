@@ -284,6 +284,23 @@
     .discuss-lines span { flex: 1; border-bottom: 1px dotted var(--ink-mute); height: 1em; }
     .discuss-hint { margin-top: 16px; font-family: var(--sans); font-size: 12px; color: var(--ink-mute); line-height: 1.6; }
 
+    /* ── 지면 맨 아래 발행 정보 ── */
+    .colophon {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 4px 16px;
+      margin-top: 30px;
+      padding-top: 10px;
+      border-top: 3px double var(--rule);
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+    .colophon b { font-family: var(--serif); font-size: 15px; color: var(--ink); }
+    .colophon .credit { font-weight: 700; color: var(--ink); }
+
     /* ── 하단 조작 막대 ── */
     .control-bar {
       position: fixed;
@@ -621,6 +638,11 @@
     </div>
 
     <div id="pages"></div>
+
+    <div class="colophon">
+      <span><b>흥덕 뉴스</b> · 생애주기 경제 시나리오 추론 브리핑</span>
+      <span class="credit">Made by 전경수, 박란하</span>
+    </div>
   </main>
 
   <footer class="control-bar">
