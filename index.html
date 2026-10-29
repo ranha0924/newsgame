@@ -1627,9 +1627,18 @@
       }
     });
 
+    // 주소에 시나리오 번호가 있으면(#scenario-2 또는 ?scenario=2) 그 탭으로 바로 열기
+    // 생애주기 자산배분 게임(gamenews)의 '신문 보러 가기' 버튼이 이 주소로 들어옴
+    function slideFromUrl() {
+      const m = location.hash.match(/scenario-?(\d+)/i) || location.search.match(/[?&]scenario=(\d+)/i);
+      const n = m ? Number(m[1]) : 1;
+      return Math.min(Math.max(n, 1), PAGES.length) - 1;
+    }
+    window.addEventListener('hashchange', () => goToSlide(slideFromUrl()));
+
     // Initial Setup
     renderPages();
-    goToSlide(0);
+    goToSlide(slideFromUrl());
   </script>
 </body>
 </html>
