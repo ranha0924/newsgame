@@ -442,6 +442,33 @@
     .reader-nav button:hover:not(:disabled) { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
     .reader-nav button:disabled { opacity: 0.3; cursor: default; }
 
+    /* 교사 비밀번호 확인 */
+    #lock-modal { align-items: center; }
+    .lock-sheet { max-width: 440px; padding: 26px 32px 26px; }
+    .lock-title { margin: 0 0 6px; font-size: 26px; font-weight: 900; letter-spacing: -0.02em; }
+    .lock-text { margin: 0 0 16px; font-family: var(--sans); font-size: 14px; color: var(--ink-soft); }
+    .lock-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid var(--ink);
+      background: rgba(255, 255, 255, 0.5);
+      font-family: var(--sans);
+      font-size: 28px;
+      letter-spacing: 0.35em;
+      text-align: center;
+      color: var(--ink);
+      outline: none;
+    }
+    .lock-input:focus { box-shadow: 0 0 0 3px rgba(35, 57, 93, 0.25); }
+    .lock-error { margin: 10px 0 0; font-family: var(--sans); font-size: 13.5px; font-weight: 700; color: var(--stamp); }
+    .lock-actions { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: 20px; }
+    .lock-shake { animation: lock-shake 0.35s ease; }
+    @keyframes lock-shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
     /* 정답 해설 */
     .answer-kicker {
       display: inline-block;
@@ -665,6 +692,21 @@
         <button id="reader-next" onclick="stepArticle(1)">다음 기사 →</button>
       </div>
     </article>
+  </div>
+
+  <!-- 교사 비밀번호 확인 -->
+  <div id="lock-modal" class="overlay" hidden onclick="if (event.target === this) closeLock()">
+    <form class="sheet lock-sheet" role="dialog" aria-modal="true" aria-labelledby="lock-title" onsubmit="submitLock(event)">
+      <div class="sheet-flag"><b>흥덕 뉴스</b><span>교사 확인</span></div>
+      <h2 id="lock-title" class="lock-title">교사용 결과 보기</h2>
+      <p class="lock-text">결과를 보려면 비밀번호를 입력하세요.</p>
+      <input id="lock-input" class="lock-input" type="password" inputmode="numeric" autocomplete="off" maxlength="12" aria-label="비밀번호">
+      <p id="lock-error" class="lock-error" hidden>비밀번호가 맞지 않아요.</p>
+      <div class="lock-actions">
+        <button type="button" class="page-btn" onclick="closeLock()">취소</button>
+        <button type="submit" class="stamp-btn">확인</button>
+      </div>
+    </form>
   </div>
 
   <!-- 정답 및 해설 -->
@@ -1295,7 +1337,7 @@
     }
 
     function syncScrollLock() {
-      document.body.style.overflow = reader || isAnswerOpen ? 'hidden' : '';
+      document.body.style.overflow = reader || isAnswerOpen || isLockOpen() ? 'hidden' : '';
     }
 
     // ── 기사 크게 보기 ──
@@ -1358,11 +1400,58 @@
       return val.startsWith('+') ? '▲' : val.startsWith('-') ? '▼' : '';
     }
 
+    // ── 교사 비밀번호 확인 ──
+    // 학생들이 정답을 미리 열어 보지 않게 하는 가벼운 잠금이다(보안 장치는 아님).
+    // 값은 비밀번호를 btoa()로 바꾼 것. 비밀번호를 바꾸려면 브라우저 콘솔에서 btoa('새 비밀번호')를 실행해 나온 값으로 바꾼다.
+    const TEACHER_CODE = 'MTIzMQ==';
+    let teacherUnlocked = false; // 한 번 맞히면 페이지를 새로 고칠 때까지 다시 묻지 않는다
+
+    function isLockOpen() {
+      return !document.getElementById('lock-modal').hidden;
+    }
+
+    function openLock() {
+      const input = document.getElementById('lock-input');
+      input.value = '';
+      document.getElementById('lock-error').hidden = true;
+      document.getElementById('lock-modal').hidden = false;
+      syncScrollLock();
+      input.focus();
+    }
+
+    function closeLock() {
+      document.getElementById('lock-modal').hidden = true;
+      syncScrollLock();
+    }
+
+    function submitLock(event) {
+      event.preventDefault();
+      const input = document.getElementById('lock-input');
+      let ok = false;
+      try { ok = btoa(input.value.trim()) === TEACHER_CODE; } catch (err) { ok = false; }
+      if (ok) {
+        teacherUnlocked = true;
+        closeLock();
+        toggleAnswer(true);
+        return;
+      }
+      document.getElementById('lock-error').hidden = false;
+      input.classList.remove('lock-shake');
+      void input.offsetWidth; // 흔들림 애니메이션을 다시 시작
+      input.classList.add('lock-shake');
+      input.select();
+    }
+
     function toggleAnswer(forceState = null) {
       const sheet = document.getElementById('answer-sheet');
       const btnText = document.getElementById('reveal-btn-text');
 
-      isAnswerOpen = forceState !== null ? forceState : !isAnswerOpen;
+      const wantOpen = forceState !== null ? forceState : !isAnswerOpen;
+      if (wantOpen && !teacherUnlocked) {
+        openLock();
+        return;
+      }
+      isAnswerOpen = wantOpen;
 
       if (isAnswerOpen) {
         if (reader) closeArticle();
@@ -1507,6 +1596,11 @@
 
     // Keyboard Shortcuts Navigation
     document.addEventListener('keydown', (e) => {
+      if (isLockOpen()) {
+        // 비밀번호 입력 중에는 단축키를 쓰지 않는다 (Enter는 입력창이 제출)
+        if (e.key === 'Escape') closeLock();
+        return;
+      }
       if (reader) {
         if (e.key === 'Escape') closeArticle();
         else if (e.key === 'ArrowRight') stepArticle(1);
